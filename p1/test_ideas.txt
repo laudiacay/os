@@ -1,0 +1,10 @@
+read_until_newline:
+  test walking off end of buffer
+  test various newline and EOF chars
+  test that stdin is actually cleared out properly when you walk off end
+  test normal behavior!
+
+parsing:
+  come up with a ... lot ... of malformatted input
+
+test all make_redirect, free_redirect, make_many_commands, free_many_commands

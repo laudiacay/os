@@ -1,41 +1,42 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <lib/parsing.h>
-
-MAX_INPUT_LENGTH = 256
-
-// print out usage error, return error code
-int usage() {
-    printf("Usage: ./mysh\n");
-    return 1;
-}
+#include "lib/parsing.h"
+#include "lib/utils.h"
+#include "lib/run.h"
 
 int main(int argc, char *argv[]) {
     // handle bad input
-    if (argc != 1)
-        return usage();
-    
+    if (argc > 2) {
+        do_error();
+        return 1;
+    }
+
     // space to store command, plus null terminator
-    char* cmd_input_buf = malloc(MAX_INPUT_LENGTH+1);
-    
+    char* cmd_input_buf;
+
     // store if we should quit
-    int quit = 0;
+    int status = 0;
 
     while (1) {
-        if (read_until_newline(cmd_input_buf)) {
-            // TODO: error, input line was too long
+        // print the prompt
+        printf("520sh> ");
+
+        // read in the input, if it failed, just go back to printing prompt
+        if (!(cmd_input_buf = read_until_newline())) continue;
+
+        // todo: free me
+        struct many_commands* cmds;
+        if (!(cmds = parse_input_buffer(cmd_input_buf))) {
+            continue;
         }
-        
-        // handle whatever we read off STDIN, return if we should quit
-        quit = do_handle_args(cmd_input_buf);
-        
-        // clean up and quit the loop if we're done
-        if (quit) {
-            free(cmd_input_buf);
-            break;
-        }
+
+        run_many_commands(cmds);
+
+        // todo: when should we break the loop?
+        free(cmd_input_buf);
+        free_many_commands(cmds);
     }
-    
-    // return a status code
-    return quit;
+
+    // todo: return a status code?
+    return status;
 }
