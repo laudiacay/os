@@ -9,6 +9,7 @@ cd dir
 echo string
 echo     hello
 echo     hi hello
+
 ls -la /tmp > output
 ls >
 ls > out1 out2 out3

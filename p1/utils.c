@@ -12,74 +12,74 @@ void do_error(void) {
     write(STDERR_FILENO, error_message, strlen(error_message));
 }
 
-// argv should be on the heap and should be pointers to the heap
-// argv2 should also be a pointer to the heap
-// if there's no redirect, redir_type = '\0', argc2 = 0, and argv2 = NULL
-struct redirect* make_redirect(int argc, char** argv,
-        char redir_type, int argc2, char** argv2) {
+struct command* make_command(int argc, char** argv) {
+    struct command* cmd = malloc(sizeof(struct command));
+    cmd->argc = argc;
+    cmd->argv = argv;
+    return cmd;
+}
+
+void free_command(struct command* cmd) {
+    for (int i = 0; i < cmd->argc; i++) {
+        free(cmd->argv[i]);
+    }
+    free(cmd->argv);
+    free(cmd);
+}
+
+void print_command(struct command* cmd) {
+    printf("        argc: %d\n", cmd->argc);
+    printf("        argv: [");
+    for (int i = 0; i < cmd->argc - 1; i++) {
+        printf("'%s', ", cmd->argv[i]);
+    }
+    printf("'%s']\n", cmd->argv[cmd->argc-1]);
+}
+
+// if there's no redirect, redir_type = '\0'
+struct redirect* make_redirect(struct list* commands, char redir_type,
+        char* out_file) {
     struct redirect* redir = malloc(sizeof(struct redirect));
-    redir->argc = argc;
-    redir->argv = argv;
+    redir->commands = commands;
     redir->redir_type = redir_type;
-    redir->argc2 = argc2;
-    redir->argv2 = argv2;
+    redir->out_file = out_file;
     return redir;
 }
 
 void free_redirect(struct redirect* redir) {
-    for (int i = 0; i < redir->argc; i++) {
-        free((redir->argv)[i]);
+    for (int i = 0; i < (redir->commands)->length; i++) {
+        free_command((struct command*)get_element(redir->commands, i));
     }
-    free(redir->argv);
-    for (int i = 0; i < redir->argc2; i++) {
-        free((redir->argv2)[i]);
-    }
-    free(redir->argv2);
+    free_list(redir->commands);
+    free(redir->out_file);
     free(redir);
 }
 
 void print_redirect(struct redirect* redir) {
-    printf(" *  argc: %d\n", redir->argc);
-    printf("    argv: [");
-    for (int i = 0; i < redir->argc - 1; i++) {
-        printf("'%s', ", redir->argv[i]);
+    printf(" *  commands:\n");
+    for (int i = 0; i < redir->commands->length; i++) {
+        print_command((struct command*)get_element(redir->commands, i));
     }
-    printf("'%s']\n", redir->argv[redir->argc-1]);
     if (redir->redir_type != '\0') {
         printf("    rtyp: %c\n", redir->redir_type);
-        printf("    argc2: %d\n", redir->argc2);
-        printf("    argv2 : [");
-        for (int i = 0; i < redir->argc2 - 1; i++) {
-            printf("'%s', ", redir->argv2[i]);
-        }
-        printf("'%s']\n", redir->argv2[redir->argc2-1]);
+        if (redir->redir_type == '>') printf("    out_file: %s\n", redir->out_file);
     } else {
         printf("    no redirection\n");
     }
 }
 
-struct many_commands* make_many_commands(struct list* commands, char type) {
+struct many_commands* make_many_commands(struct list* redirects, char type) {
     struct many_commands* many_com = malloc(sizeof(struct many_commands));
-    many_com->commands = commands;
+    many_com->redirects = redirects;
     many_com->join_type = type;
     return many_com;
 }
 
-void free_command_list(struct list* commands) {
-    int redir_len = commands->length;
-    struct redirect* redirect;
-
-    // empty out the list and free things
-    for (int j = 0; j < redir_len; j++) {
-        redirect = (struct redirect *)delete_element(commands, 0);
-        free_redirect(redirect);
-    }
-    // free the list itself
-    free_list(commands);
-}
-
 void free_many_commands(struct many_commands* many_com) {
-    free_command_list(many_com->commands);
+    for (int i = 0; i < (many_com->redirects)->length; i++) {
+        free_redirect((struct redirect*)get_element(many_com->redirects, i));
+    }
+    free_list(many_com->redirects);
     free(many_com);
 }
 
@@ -88,8 +88,8 @@ void print_many_commands(struct many_commands* many_com) {
     printf("redirect structs:\n");
 
     struct redirect* redir;
-    for (int i = 0; i < (many_com->commands)->length; i++) {
-        redir = get_element(many_com->commands, i);
+    for (int i = 0; i < (many_com->redirects)->length; i++) {
+        redir = get_element(many_com->redirects, i);
         print_redirect(redir);
     }
 }

@@ -4,12 +4,12 @@
 #include "lib/utils.h"
 #include "lib/run.h"
 
-int main(int argc, char *argv[]) {
+int main() {
     // handle bad input
-    if (argc > 2) {
+    /*if (argc > 2) {
         do_error();
         return 1;
-    }
+    }*/
 
     // space to store command, plus null terminator
     char* cmd_input_buf;
@@ -33,7 +33,9 @@ int main(int argc, char *argv[]) {
         run_many_commands(cmds);
 
         // todo: when should we break the loop?
-        //free(cmd_input_buf);
+        // todo: batch mode
+        // todo: check all malloc failures and fork failures
+        free(cmd_input_buf);
         free_many_commands(cmds);
     }
 
