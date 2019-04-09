@@ -17,5 +17,6 @@ void free_list(struct list* list);
 void* get_element(struct list* list, int index);
 void* delete_element(struct list* list, int index);
 void add_elem(struct list* list, int index, void* data);
+void free_list_of_simple_ptrs(struct list* list);
 
 #endif

@@ -124,9 +124,11 @@ struct list* tokenize_into_argv_list(char* before_redirect) {
 // get a valid argv array from a list of arguments
 char** argv_from_list(struct list* argv_list) {
     char** argv = malloc((argv_list->length + 1)*sizeof(char*));
-
+    char* argv_i;
     for (int i = 0; i < argv_list->length; i++) {
-        argv[i] = (char*)get_element(argv_list, i);
+        argv_i = (char*)get_element(argv_list, i);
+        argv[i] = malloc(strlen(argv_i) + 1);
+        strcpy(argv[i], argv_i);
     }
 
     // null terminate argv
@@ -154,6 +156,7 @@ char** tokenize_file_redir_out(char* after_redirect) {
 
 // creates a redirect struct out of a string
 // checks for bad formatting
+// todo: handle multiple pipes
 struct redirect* build_redirect(char* input_string) {
     char delims[3] = ">|";
     char* saveptr;
@@ -179,6 +182,15 @@ struct redirect* build_redirect(char* input_string) {
     int argc = arg_list->length;
     char** argv = argv_from_list(arg_list);
 
+    int len = arg_list->length;
+    char* current_str;
+    for (int i = 0; i < len - 1; i++) {
+        current_str = get_element(arg_list, i);
+        printf("this element: %s\n", current_str);
+        free(current_str);
+    }
+    free_list(arg_list);
+
     // handle after_redirect tokenization
     int argc2;
     char** argv2;
@@ -186,6 +198,11 @@ struct redirect* build_redirect(char* input_string) {
         struct list* arg2_list = tokenize_into_argv_list(after_redirect);
         argc2 = arg2_list->length;
         argv2 = argv_from_list(arg2_list);
+        len = arg2_list->length;
+        for (int i = 0; i < len - 1; i++) {
+            free(get_element(arg2_list, i));
+        }
+        free_list(arg2_list);
     } else if (redir_type == '>') {
         argc2 = 1;
         argv2 = tokenize_file_redir_out(after_redirect);
@@ -248,6 +265,8 @@ struct many_commands* parse_input_buffer(char* in_buffer) {
     struct list* joined_strings = load_joined_strings_into_list(in_buffer);
 
     struct list* command_list = build_command_list(joined_strings);
+    free_list(joined_strings);
+
     if (command_list == NULL) {
         return NULL;
     }

@@ -24,16 +24,16 @@ int main(int argc, char *argv[]) {
         // read in the input, if it failed, just go back to printing prompt
         if (!(cmd_input_buf = read_until_newline())) continue;
 
-        // todo: free me
         struct many_commands* cmds;
-        if (!(cmds = parse_input_buffer(cmd_input_buf))) {
+        if ((cmds = parse_input_buffer(cmd_input_buf)) == NULL) {
+            free(cmd_input_buf);
             continue;
         }
 
         run_many_commands(cmds);
 
         // todo: when should we break the loop?
-        free(cmd_input_buf);
+        //free(cmd_input_buf);
         free_many_commands(cmds);
     }
 

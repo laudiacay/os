@@ -3,6 +3,7 @@
 
 // define constants
 #define MAX_INPUT_LENGTH 256
+#define MAX_PATH_LENGTH 4096
 
 // define global functions
 void do_error(void);

@@ -1,0 +1,23 @@
+ls -la /tmp
+ls; ps; who
+ls + ps + who
+ls; ps + who
+  quit
+pwd
+cd
+cd dir
+echo string
+echo     hello
+echo     hi hello
+ls -la /tmp > output
+ls >
+ls > out1 out2 out3
+ls > out1 > out2
+ls | grep ".c"
+ls > file | grep ".c"
+ls;ls;ls
+ls ; ls ; ls
+ls>a; ls > b; ls> c; ls >d
+ls ; who ; ps
+ls > /tmp/ls-out;;;; ps > /non-existing-dir/file;
+ls-who-ps
