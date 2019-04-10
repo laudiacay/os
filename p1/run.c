@@ -67,7 +67,7 @@ void run_parallel_commands(struct list* redirects) {
     for (int i = 0; i < pid_list->length; i++) {
         // pop pids off the pid_list like it's a stack
         // only need one loop this way lol
-        pid = (int*)get_element(pid_list, 0);
+        pid = (int*)get_element(pid_list, i);
         waitpid(*pid, &stat, 0);
         free(pid);
     }

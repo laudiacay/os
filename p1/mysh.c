@@ -1,20 +1,22 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include "lib/parsing.h"
 #include "lib/utils.h"
 #include "lib/run.h"
 
-void one_iter(char* cmd_input_buf, struct many_commands* cmds, int batch_mode) {
+void one_iter(char* cmd_input_buf, struct many_commands* cmds, int batch_mode,
+        FILE* fp) {
     if (!batch_mode) printf("520sh> ");
 
-    if (!(cmd_input_buf = read_until_newline())) continue;
+    if (!(cmd_input_buf = read_until_newline(batch_mode, fp))) return;
 
     if (batch_mode) printf("%s\n", cmd_input_buf);
 
     // go ahead and parse it
     if ((cmds = parse_input_buffer(cmd_input_buf)) == NULL) {
         free(cmd_input_buf);
-        continue;
+        return;
     }
 
     // run it
@@ -38,15 +40,19 @@ int main(int argc, char* argv[]) {
 
     if (argc == 2) {
         char* batch_filename = argv[1];
-        FILE* batch_file = open(batch_filename);
-        dup2(1, batch_file); // is this right um
-        while (!feof(batch_file)) {
-            one_iter(cmd_input_buf, cmds, 1);
+        char mode[2] = "r";
+        FILE* fp = fopen(batch_filename, mode);
+        if (!fp) {
+            do_error();
+            return 1;
         }
-        dup2(batch_file, 1);
+        while (!feof(fp)) {
+            one_iter(cmd_input_buf, cmds, 1, fp);
+        }
+        fclose(fp);
     } else {
         while (1) {
-            one_iter(cmd_input_buf, cmds, 0);
+            one_iter(cmd_input_buf, cmds, 0, NULL);
         }
     }
 

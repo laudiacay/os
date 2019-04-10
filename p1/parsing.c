@@ -5,10 +5,11 @@
 #include "lib/list.h"
 
 // clear stdin, for when the input is too long (munch until you hit the end lol)
-void clear_stdin(void) {
+void clear_stdin(int batch_mode, FILE* fp) {
     char c;
     while (1) {
-        c = getchar();
+        if (!batch_mode) c = getchar();
+        else c = fgetc(fp);
         if (c == EOF || c == '\n' || c == '\r') {
             break;
         }
@@ -17,7 +18,7 @@ void clear_stdin(void) {
 
 // read STDIN into buffer, of size MAX_INPUT_LENGTH + 1
 // return NULL for error, buffer if everything went okay
-char *read_until_newline(void) {
+char *read_until_newline(int batch_mode, FILE* fp) {
 
     // we want to load the input into a buffer
     char* cmd_input_buf = malloc(MAX_INPUT_LENGTH + 1);
@@ -31,7 +32,8 @@ char *read_until_newline(void) {
     char c; // keep track of the current char
     int i = 0; // keep track of the position in the buffer
     while (1) {
-        c = getchar();
+        if (!batch_mode) c = getchar();
+        else c = fgetc(fp);
 
         // are we done reading? if so, null terminate and return.
         if (c == EOF || c == '\n' || c == '\r') {
@@ -42,7 +44,7 @@ char *read_until_newline(void) {
         // did we walk off the end of the buffer?
         // if so, clear stdin, free buf, error out, return NULL.
         if (i >= MAX_INPUT_LENGTH) {
-            clear_stdin();
+            clear_stdin(batch_mode, fp);
             free(cmd_input_buf);
             do_error();
             return NULL;

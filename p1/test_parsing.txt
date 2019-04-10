@@ -2,7 +2,6 @@ ls -la /tmp
 ls; ps; who
 ls + ps + who
 ls; ps + who
-  quit
 pwd
 cd
 cd dir
