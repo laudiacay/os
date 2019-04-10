@@ -4,41 +4,51 @@
 #include "lib/utils.h"
 #include "lib/run.h"
 
-int main() {
+void one_iter(char* cmd_input_buf, struct many_commands* cmds, int batch_mode) {
+    if (!batch_mode) printf("520sh> ");
+
+    if (!(cmd_input_buf = read_until_newline())) continue;
+
+    if (batch_mode) printf("%s\n", cmd_input_buf);
+
+    // go ahead and parse it
+    if ((cmds = parse_input_buffer(cmd_input_buf)) == NULL) {
+        free(cmd_input_buf);
+        continue;
+    }
+
+    // run it
+    run_many_commands(cmds);
+
+    // clean up
+    free(cmd_input_buf);
+    free_many_commands(cmds);
+}
+
+int main(int argc, char* argv[]) {
     // handle bad input
-    /*if (argc > 2) {
+    if (argc > 2) {
         do_error();
         return 1;
-    }*/
+    }
 
     // space to store command, plus null terminator
     char* cmd_input_buf;
+    struct many_commands* cmds;
 
-    // store if we should quit
-    int status = 0;
-
-    while (1) {
-        // print the prompt
-        printf("520sh> ");
-
-        // read in the input, if it failed, just go back to printing prompt
-        if (!(cmd_input_buf = read_until_newline())) continue;
-
-        struct many_commands* cmds;
-        if ((cmds = parse_input_buffer(cmd_input_buf)) == NULL) {
-            free(cmd_input_buf);
-            continue;
+    if (argc == 2) {
+        char* batch_filename = argv[1];
+        FILE* batch_file = open(batch_filename);
+        dup2(1, batch_file); // is this right um
+        while (!feof(batch_file)) {
+            one_iter(cmd_input_buf, cmds, 1);
         }
-
-        run_many_commands(cmds);
-
-        // todo: when should we break the loop?
-        // todo: batch mode
-        // todo: check all malloc failures and fork failures
-        free(cmd_input_buf);
-        free_many_commands(cmds);
+        dup2(batch_file, 1);
+    } else {
+        while (1) {
+            one_iter(cmd_input_buf, cmds, 0);
+        }
     }
 
-    // todo: return a status code?
-    return status;
+    return 0;
 }

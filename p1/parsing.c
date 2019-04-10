@@ -15,7 +15,6 @@ void clear_stdin(void) {
     }
 }
 
-
 // read STDIN into buffer, of size MAX_INPUT_LENGTH + 1
 // return NULL for error, buffer if everything went okay
 char *read_until_newline(void) {
