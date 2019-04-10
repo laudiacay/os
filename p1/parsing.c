@@ -207,6 +207,7 @@ struct redirect* build_pipe_redirect(char* input_string) {
 // creates a redirect struct out of a string
 // checks for bad formatting
 // todo: figure out https://piazza.com/class/ju1n2i37fu1p4?cid=22
+// todo: fix all malloc, file, and fork failures
 struct redirect* build_redirect(char* input_string) {
     char redir_type = which_redir_type(input_string);
     struct redirect* ret;
@@ -254,7 +255,6 @@ struct list* build_redirect_list(struct list* joined_strings) {
 }
 
 // take input buffer, output list of strings parsed into tokens
-// todo: figure out the incompatible pointer error....
 struct many_commands* parse_input_buffer(char* in_buffer) {
     // calculate what kind of redirect we're doing
     char join_type = which_join_type(in_buffer);
@@ -265,6 +265,7 @@ struct many_commands* parse_input_buffer(char* in_buffer) {
     }
 
     struct list* joined_strings = joined_command_to_list(in_buffer);
+    // todo: https://piazza.com/class/ju1n2i37fu1p4?cid=24
     struct list* redirect_list = build_redirect_list(joined_strings);
 
     free_list(joined_strings);
