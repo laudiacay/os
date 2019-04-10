@@ -11,4 +11,4 @@ list: lib/*.h list.c list_test.c
 
 .PHONY: clean
 clean:
-	rm -f *.o mysh
+	rm -f *.o mysh list
