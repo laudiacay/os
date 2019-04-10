@@ -10,9 +10,7 @@ void clear_stdin(int batch_mode, FILE* fp) {
     while (1) {
         if (!batch_mode) c = getchar();
         else c = fgetc(fp);
-        if (c == EOF || c == '\n' || c == '\r') {
-            break;
-        }
+        if (c == EOF || c == '\n' || c == '\r') break;
     }
 }
 
@@ -141,18 +139,14 @@ struct command* command_from_string(char* in_buffer) {
 }
 
 char* validate_and_clean_redir_filename(char* raw_filename) {
-    if (!raw_filename) {
-        return NULL;
-    }
+    if (!raw_filename) return NULL;
 
     char delims[3] = "\t ";
     char* saveptr;
 
     char* filename = strtok_r(raw_filename, delims, &saveptr);
     char* extra = strtok_r(NULL, delims, &saveptr);
-    if (extra || !filename) {
-        return NULL;
-    }
+    if (extra || !filename) return NULL;
     return filename;
 }
 
@@ -206,23 +200,14 @@ struct redirect* build_pipe_redirect(char* input_string) {
 
 // creates a redirect struct out of a string
 // checks for bad formatting
-// todo: figure out https://piazza.com/class/ju1n2i37fu1p4?cid=22
 // todo: fix all malloc, file, and fork failures
 struct redirect* build_redirect(char* input_string) {
     char redir_type = which_redir_type(input_string);
     struct redirect* ret;
-    if (redir_type == '\1') {
-        do_error();
-        ret = NULL;
-    } else if (redir_type == '>') {
-        if (!(ret = build_arrow_redirect(input_string))) {
-            do_error();
-        }
-    } else if (redir_type == '|') {
-        if (!(ret = build_pipe_redirect(input_string))) {
-            do_error();
-        }
-    } else {
+    if (redir_type == '\1') ret = NULL;
+    else if (redir_type == '>') ret = build_arrow_redirect(input_string);
+    else if (redir_type == '|') ret = build_pipe_redirect(input_string);
+    else {
         struct list* commands = init_list();
         add_elem(commands, 0, command_from_string(input_string));
         ret = make_redirect(commands, '\0', NULL);
@@ -237,17 +222,6 @@ struct list* build_redirect_list(struct list* joined_strings) {
 
     for (int i = 0; i < joined_strings->length; i++) {
         redirect = build_redirect((char*)get_element(joined_strings, i));
-
-        // failed, time to free things and leave
-        if (redirect == NULL) {
-            int len = redir_list->length;
-            for (int j = 0; j < len; j++) {
-                free_redirect((struct redirect*)get_element(redir_list, j));
-            }
-            free_list(redir_list);
-            return NULL;
-        }
-
         add_elem(redir_list, redir_list->length, redirect);
     }
 
@@ -259,20 +233,18 @@ struct many_commands* parse_input_buffer(char* in_buffer) {
     // calculate what kind of redirect we're doing
     char join_type = which_join_type(in_buffer);
 
-    if (join_type == '\1') {  // error parsing redirect
+    if (join_type == '\1') {  // error parsing joins
         do_error();
         return NULL;
     }
 
     struct list* joined_strings = joined_command_to_list(in_buffer);
-    // todo: https://piazza.com/class/ju1n2i37fu1p4?cid=24
+
     struct list* redirect_list = build_redirect_list(joined_strings);
 
     free_list(joined_strings);
 
-    if (redirect_list == NULL) {
-        return NULL;
-    }
+    if (redirect_list == NULL) return NULL;
 
     struct many_commands* many_coms = malloc(sizeof(struct many_commands));
     many_coms->redirects = redirect_list;

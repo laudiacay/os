@@ -14,7 +14,7 @@ void one_iter(char* cmd_input_buf, struct many_commands* cmds, int batch_mode,
     if (batch_mode) printf("%s\n", cmd_input_buf);
 
     // go ahead and parse it
-    if ((cmds = parse_input_buffer(cmd_input_buf)) == NULL) {
+    if (!(cmds = parse_input_buffer(cmd_input_buf))) {
         free(cmd_input_buf);
         return;
     }

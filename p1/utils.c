@@ -20,6 +20,8 @@ struct command* make_command(int argc, char** argv) {
 }
 
 void free_command(struct command* cmd) {
+    if (!cmd) return;
+
     for (int i = 0; i < cmd->argc; i++) {
         free(cmd->argv[i]);
     }
@@ -47,6 +49,7 @@ struct redirect* make_redirect(struct list* commands, char redir_type,
 }
 
 void free_redirect(struct redirect* redir) {
+    if (!redir) return;
     for (int i = 0; i < (redir->commands)->length; i++) {
         free_command((struct command*)get_element(redir->commands, i));
     }

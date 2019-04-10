@@ -3,7 +3,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/types.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include "lib/utils.h"
 #include "lib/list.h"
@@ -32,41 +33,53 @@ int run_builtin(int argc, char** argv) {
     return 1;
 }
 
-int* run_command(struct command* cmd, int* pid) {
+int* run_redirect(struct redirect* redir, int* pid) {
+    // todo: implement pipe
+    int outfile = 0;
+    if (redir->redir_type == '|') return NULL;
+
+    struct command* cmd = get_element(redir->commands, 0);
     if (!run_builtin(cmd->argc, cmd->argv)) {
         pid = malloc(sizeof(int));
         if ((*pid = fork()) == 0) {
+            if (redir->redir_type == '>') {
+                // todo: what the hell are these file permissions
+                outfile = open(redir->out_file, O_CREAT|O_WRONLY|O_TRUNC);
+                if (outfile == -1) {
+                    do_error();
+                    free(pid);
+                    exit(0);
+                }
+                dup2(outfile, 1);
+            }
             execvp(cmd->argv[0], cmd->argv);
             do_error();
             free(pid);
             exit(0);
         }
     } else pid = NULL;
+
     return pid;
 }
 
 void run_parallel_commands(struct list* redirects) {
     struct list* pid_list = init_list();
     struct redirect* cur_redirect;
-    struct command* cur_command;
-    int* pid;
+    int* pid = NULL;
 
     for (int i = 0; i < redirects->length; i++) {
         cur_redirect = (struct redirect*)get_element(redirects, i);
-
-        // todo: add pipe/redirect support here
-        cur_command = (struct command*)get_element(cur_redirect->commands, 0);
-        pid = run_command(cur_command, pid);
-
-        if (pid) {
-            add_elem(pid_list, pid_list->length, pid);
+        if (cur_redirect == NULL) {
+            do_error();
+            continue;
         }
+
+        pid = run_redirect(cur_redirect, pid);
+        if (pid) add_elem(pid_list, pid_list->length, pid);
     }
 
     int stat;
     for (int i = 0; i < pid_list->length; i++) {
-        // pop pids off the pid_list like it's a stack
-        // only need one loop this way lol
         pid = (int*)get_element(pid_list, i);
         waitpid(*pid, &stat, 0);
         free(pid);
@@ -79,14 +92,15 @@ void run_serial_commands(struct list* redirects) {
     int *pid = NULL;
     int stat;
     struct redirect* cur_redirect;
-    struct command* cur_command;
 
     for (int i = 0; i < redirects->length; i++) {
         cur_redirect = (struct redirect*)get_element(redirects, i);
-        // todo: add pipe/redirect support here
-        cur_command = (struct command*)get_element(cur_redirect->commands, 0);
+        if (cur_redirect == NULL) {
+            do_error();
+            continue;
+        }
 
-        pid = run_command(cur_command, pid);
+        pid = run_redirect(cur_redirect, pid);
 
         if (pid) {
             waitpid(*pid, &stat, 0);
