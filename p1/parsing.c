@@ -123,10 +123,16 @@ struct command* command_from_string(char* in_buffer) {
     }
 
     char** argv = malloc((argv_list->length + 1)*sizeof(char*));
+    if (!argv) {
+        // todo: free argv_list
+        do_error();
+        return NULL;
+    }
     char* argv_i;
     for (int i = 0; i < argv_list->length; i++) {
         argv_i = (char*)get_element(argv_list, i);
         argv[i] = malloc(strlen(argv_i) + 1);
+        // todo: catch this malloc failure
         strcpy(argv[i], argv_i);
     }
     // null terminate argv
@@ -159,6 +165,11 @@ struct redirect* build_arrow_redirect(char* input_string) {
     // get input file and put it into commands list
     char* before_redir = strtok_r(input_string, delims, &saveptr);
     struct command* com = command_from_string(before_redir);
+    if (!com) {
+        do_error();
+        free_list(commands);
+        return NULL;
+    }
     add_elem(commands, commands->length, com);
 
     // grab output file and put it on the heap
@@ -175,6 +186,8 @@ struct redirect* build_arrow_redirect(char* input_string) {
     }
     // stick it on the heap for use later :)
     char* after_redir = malloc(strlen(_after_redir) + 1);
+    // todo: catch this malloc failure
+
     strcpy(after_redir, _after_redir);
 
     return make_redirect(commands, '>', after_redir);
@@ -191,6 +204,11 @@ struct redirect* build_pipe_redirect(char* input_string) {
     token = strtok_r(input_string, delims, &saveptr);
     while (token != NULL) {
         com = command_from_string(token);
+        if (!com) {
+            // todo: what other cleanup?
+            do_error();
+            return NULL;
+        }
         add_elem(commands, commands->length, com);
         token = strtok_r(NULL, delims, &saveptr);
     }
@@ -210,6 +228,7 @@ struct redirect* build_redirect(char* input_string) {
     else {
         struct list* commands = init_list();
         add_elem(commands, 0, command_from_string(input_string));
+        // todo: catch if command_from_string failed;
         ret = make_redirect(commands, '\0', NULL);
     }
     return ret;
@@ -247,6 +266,10 @@ struct many_commands* parse_input_buffer(char* in_buffer) {
     if (redirect_list == NULL) return NULL;
 
     struct many_commands* many_coms = malloc(sizeof(struct many_commands));
+    if (!many_coms) {
+        // todo: is this a memory leak?
+        return NULL;
+    }
     many_coms->redirects = redirect_list;
     many_coms->join_type = join_type;
 

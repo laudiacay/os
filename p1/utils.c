@@ -7,6 +7,9 @@
 
 // writes error message to STDERR
 // caller is responsible for all cleanup!!
+// unless it's a parsing error, in which case just return NULL
+// this is a placeholder for whatever list the output is going into
+// so that we can put errors in the right place in the output
 void do_error(void) {
     char error_message[30] = "An error has occurred\n";
     write(STDERR_FILENO, error_message, strlen(error_message));
@@ -14,6 +17,7 @@ void do_error(void) {
 
 struct command* make_command(int argc, char** argv) {
     struct command* cmd = malloc(sizeof(struct command));
+    // todo: catch malloc fail
     cmd->argc = argc;
     cmd->argv = argv;
     return cmd;
@@ -73,6 +77,7 @@ void print_redirect(struct redirect* redir) {
 
 struct many_commands* make_many_commands(struct list* redirects, char type) {
     struct many_commands* many_com = malloc(sizeof(struct many_commands));
+    // todo: catch malloc fail
     many_com->redirects = redirects;
     many_com->join_type = type;
     return many_com;

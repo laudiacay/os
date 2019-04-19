@@ -27,6 +27,7 @@ void one_iter(char* cmd_input_buf, struct many_commands* cmds, int batch_mode,
     free_many_commands(cmds);
 }
 
+// todo: change all printfs to writes, because batch mode or something
 int main(int argc, char* argv[]) {
     // handle bad input
     if (argc > 2) {

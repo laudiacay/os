@@ -33,31 +33,100 @@ int run_builtin(int argc, char** argv) {
     return 1;
 }
 
-int* run_redirect(struct redirect* redir, int* pid) {
-    // todo: implement pipe
-    int outfile = 0;
-    if (redir->redir_type == '|') return NULL;
+// todo: leaking file descriptors?
+int* run_piped_redirect(struct redirect* redir, int* pid) {
+    int save_stdin = dup(0);
+    int save_stdout = dup(1);
+    int in = 0;
+    int out = 1;
+    int stat;
+    int pipefd[2];
+    struct command* cmd;
 
-    struct command* cmd = get_element(redir->commands, 0);
+
+    for (int i = 0; i < redir->commands->length - 1; i++) {
+        pipe(pipefd); // todo: check for failure here
+        out = pipefd[1];
+        dup2(out, 1);
+        close(out);
+        cmd = get_element(redir->commands, i);
+
+        if (!run_builtin(cmd->argc, cmd->argv)) {
+            pid = malloc(sizeof(int));
+            // todo: catch malloc fail
+            if ((*pid = fork()) == 0) {
+                execvp(cmd->argv[0], cmd->argv);
+                do_error();
+                free(pid);
+                exit(0);
+            }
+            waitpid(*pid, &stat, 0);
+            free(pid);
+        }
+
+        in = pipefd[0]; // set in for next process
+        dup2(in, 0);
+        close(in);
+    }
+
+    dup2(save_stdout, 1);
+    close(save_stdout);
+
+    cmd = get_element(redir->commands, redir->commands->length - 1);
+
     if (!run_builtin(cmd->argc, cmd->argv)) {
         pid = malloc(sizeof(int));
+        // todo: catch malloc fail
         if ((*pid = fork()) == 0) {
-            if (redir->redir_type == '>') {
-                // todo: what the hell are these file permissions
-                outfile = open(redir->out_file, O_CREAT|O_WRONLY|O_TRUNC);
-                if (outfile == -1) {
-                    do_error();
-                    free(pid);
-                    exit(0);
-                }
-                dup2(outfile, 1);
-            }
+            execvp(cmd->argv[0], cmd->argv);
+            do_error();
+            free(pid);
+            exit(0);
+        }
+    }
+
+    dup2(save_stdin, 0);
+    close(save_stdin);
+    return pid;
+}
+
+// todo: check on >, you totally fucking broke it lmao
+int* run_redirect(struct redirect* redir, int* pid) {
+    int outfile = 0;
+    int stdout_save = 0;
+    if (redir->redir_type == '|') {
+        pid = run_piped_redirect(redir, pid);
+        return pid;
+    }
+
+    struct command* cmd = get_element(redir->commands, 0);
+
+    if (redir->redir_type == '>') {
+        outfile = open(redir->out_file, O_CREAT|O_RDWR|O_TRUNC);
+        if (outfile == -1) {
+            do_error();
+            exit(0);
+        }
+        stdout_save = dup(1);
+        dup2(outfile, 1);
+    }
+
+    if (!run_builtin(cmd->argc, cmd->argv)) {
+        pid = malloc(sizeof(int));
+        // todo: catch malloc fail
+        if ((*pid = fork()) == 0) {
             execvp(cmd->argv[0], cmd->argv);
             do_error();
             free(pid);
             exit(0);
         }
     } else pid = NULL;
+
+    if (redir->redir_type == '>') {
+        close(outfile);
+        dup2(stdout_save, 1);
+        close(stdout_save);
+    }
 
     return pid;
 }

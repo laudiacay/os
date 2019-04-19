@@ -18,7 +18,6 @@ void cd(char* dest) {
     if (dest == NULL) {
         dest = getenv("HOME");
     }
-
     if (chdir(dest)) do_error();
 }
 
