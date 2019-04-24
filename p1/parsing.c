@@ -34,14 +34,12 @@ char* read_until_newline(int batch_mode, FILE* fp) {
         else c = fgetc(fp);
 
         if (c == EOF) {
-            printf("EOF: %d\n", i);
             free(cmd_input_buf);
             return NULL;
         }
 
         // are we done reading? if so, null terminate and return.
         if (c == '\n' || c == '\r') {
-            printf("i'm lost, help: %d\n", i);
             cmd_input_buf[i] = '\0';
             return cmd_input_buf;
         }

@@ -22,7 +22,10 @@ void one_iter(char* cmd_input_buf, struct many_commands* cmds, int batch_mode,
     if (!cmd_input_buf) return;
 
     if (batch_mode) {
-        if (!write(STDOUT_FILENO, cmd_input_buf, strlen(cmd_input_buf))) return;
+        if (strlen(cmd_input_buf) > 0) {
+            if (!write(STDOUT_FILENO, cmd_input_buf, strlen(cmd_input_buf)))
+                return;
+        }
         if (!write(STDOUT_FILENO, newline, strlen(newline))) return;
         printf("?!?!?\n");
     }
