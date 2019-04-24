@@ -15,8 +15,8 @@ void pwd() {
         do_error();
         return;
     }
-    write(STDOUT_FILENO, cwd, strlen(cwd));
-    write(STDOUT_FILENO, newline, strlen(newline));
+    if (!write(STDOUT_FILENO, cwd, strlen(cwd))) return;
+    if (!write(STDOUT_FILENO, newline, strlen(newline))) return;
     free(cwd);
 }
 
@@ -29,6 +29,6 @@ void cd(char* dest) {
 
 void echo(char* string) {
     char* newline = "\n";
-    write(STDOUT_FILENO, string, strlen(string));
-    write(STDOUT_FILENO, newline, strlen(newline));
+    if (!write(STDOUT_FILENO, string, strlen(string))) return;
+    if (!write(STDOUT_FILENO, newline, strlen(newline))) return;
 }
