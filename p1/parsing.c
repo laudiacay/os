@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include "lib/utils.h"
 #include "lib/list.h"
 
@@ -13,7 +14,7 @@ void clear_stdin(int batch_mode, FILE* fp) {
         else {
             c = fgetc(fp);
             print_command_in_batch_mode = &c;
-            write(STDOUT_FILENO, print_command_in_batch_mode, 1);
+            if (!write(STDOUT_FILENO, print_command_in_batch_mode, 1)) return;
         }
         if (c == EOF || c == '\n' || c == '\r') break;
     }
@@ -53,7 +54,7 @@ char* read_until_newline(int batch_mode, FILE* fp) {
         // if so, clear stdin, free buf, error out, return NULL.
         // if batch_mode, write it out to stdout. this is hack. ugh.
         if (i >= MAX_INPUT_LENGTH) {
-            if (!write(STDOUT_FILENO, cmd_input_buf, i-1)) return;
+            if (!write(STDOUT_FILENO, cmd_input_buf, i-1)) return NULL;
             clear_stdin(batch_mode, fp);
             free(cmd_input_buf);
             do_error();
