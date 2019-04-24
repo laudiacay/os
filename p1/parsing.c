@@ -50,6 +50,9 @@ char* read_until_newline(int batch_mode, FILE* fp) {
             return cmd_input_buf;
         }
 
+        // put c in the buffer
+        cmd_input_buf[i] = c;
+
         // did we walk off the end of the buffer?
         // if so, clear stdin, free buf, error out, return NULL.
         // if batch_mode, write it out to stdout. this is hack. ugh.
@@ -61,8 +64,7 @@ char* read_until_newline(int batch_mode, FILE* fp) {
             return NULL;
         }
 
-        // otherwise, all is well, put c into the buffer and increment i
-        cmd_input_buf[i] = c;
+        // otherwise, all is well, increment i
         i++;
     }
 }
