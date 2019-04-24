@@ -42,6 +42,7 @@ int main(int argc, char* argv[]) {
     // handle bad input
     if (argc > 2) {
         do_error();
+        printf("yeet\n");
         return 1;
     }
 
@@ -55,6 +56,7 @@ int main(int argc, char* argv[]) {
         FILE* fp = fopen(batch_filename, mode);
         if (!fp) {
             do_error();
+            printf("yeeeeet\n");
             return 1;
         }
         while (!feof(fp)) {
