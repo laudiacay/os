@@ -34,6 +34,7 @@ char* read_until_newline(int batch_mode, FILE* fp) {
         else c = fgetc(fp);
 
         if (c == EOF) {
+            printf("EOF: %d\n", i);
             free(cmd_input_buf);
             return NULL;
         }
