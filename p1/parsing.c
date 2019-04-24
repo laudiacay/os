@@ -40,6 +40,7 @@ char* read_until_newline(int batch_mode, FILE* fp) {
 
         // are we done reading? if so, null terminate and return.
         if (c == '\n' || c == '\r') {
+            printf("%d\n", i);
             cmd_input_buf[i] = '\0';
             return cmd_input_buf;
         }
