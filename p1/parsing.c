@@ -23,7 +23,6 @@ char* read_until_newline(int batch_mode, FILE* fp) {
 
     // malloc failed, error out and return error code
     if (!cmd_input_buf) {
-        printf("what the fuuuuuck\n");
         do_error();
         return NULL;
     }
@@ -42,7 +41,7 @@ char* read_until_newline(int batch_mode, FILE* fp) {
 
         // are we done reading? if so, null terminate and return.
         if (c == '\n' || c == '\r') {
-            printf("%d\n", i);
+            printf("i'm lost, help: %d\n", i);
             cmd_input_buf[i] = '\0';
             return cmd_input_buf;
         }
