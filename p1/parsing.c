@@ -16,7 +16,7 @@ void clear_stdin(int batch_mode, FILE* fp) {
 
 // read STDIN into buffer, of size MAX_INPUT_LENGTH + 1
 // return NULL for error, buffer if everything went okay
-char *read_until_newline(int batch_mode, FILE* fp) {
+char* read_until_newline(int batch_mode, FILE* fp) {
 
     // we want to load the input into a buffer
     char* cmd_input_buf = malloc(MAX_INPUT_LENGTH + 1);
@@ -33,8 +33,13 @@ char *read_until_newline(int batch_mode, FILE* fp) {
         if (!batch_mode) c = getchar();
         else c = fgetc(fp);
 
+        if (c == EOF) {
+            free(cmd_input_buf);
+            return NULL;
+        }
+
         // are we done reading? if so, null terminate and return.
-        if (c == EOF || c == '\n' || c == '\r') {
+        if (c == '\n' || c == '\r') {
             cmd_input_buf[i] = '\0';
             return cmd_input_buf;
         }

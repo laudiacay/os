@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 #include "lib/parsing.h"
 #include "lib/utils.h"
 #include "lib/run.h"
@@ -9,7 +10,9 @@ void one_iter(char* cmd_input_buf, struct many_commands* cmds, int batch_mode,
         FILE* fp) {
     if (!batch_mode) printf("520sh> ");
 
-    if (!(cmd_input_buf = read_until_newline(batch_mode, fp))) return;
+    cmd_input_buf = read_until_newline(batch_mode, fp);
+
+    if (!cmd_input_buf) return;
 
     if (batch_mode) printf("%s\n", cmd_input_buf);
 
@@ -27,7 +30,6 @@ void one_iter(char* cmd_input_buf, struct many_commands* cmds, int batch_mode,
     free_many_commands(cmds);
 }
 
-// todo: change all printfs to writes, because batch mode or something
 int main(int argc, char* argv[]) {
     // handle bad input
     if (argc > 2) {
@@ -36,7 +38,7 @@ int main(int argc, char* argv[]) {
     }
 
     // space to store command, plus null terminator
-    char* cmd_input_buf;
+    char* cmd_input_buf = NULL;
     struct many_commands* cmds;
 
     if (argc == 2) {

@@ -1,0 +1,65 @@
+Make sure your computer can run csh script.(You may need install c-shell).
+
+Create a new directory "test", put two files (run-tests.csh and para.c) and 
+a directory (scripts) inside it.
+
+Copy your implementation into "test".
+
+Compile para.c:
+  gcc -Wall -o para para.c
+
+Export path:
+  export PATH=$PATH:$(path of para)
+
+Create a directory to store oracle results
+  mkdir results
+
+To run all the tests, simply type:
+
+  ./run-tests.csh
+
+To run a specific test, type:
+
+  ./run-tests.csh <testNumber>
+
+as in
+
+  ./run-tests.csh 12
+
+Running a specific test may be useful to debug a particular problem you
+are having. 
+
+Here are some short descriptions of what the released tests are supposed to check:
+
+ 0 too many command-line arguments
+ 1 input file: does not exist
+ 2 input file: is empty
+ 3 input file: contain a blank line 
+ 
+ 4 pwd only
+ 5 pwd with an argument
+ 6 exit command
+ 7 cd without an argument
+ 
+ 8 cd with an argument
+ 9 simple external command
+ 10 command longer than 256 characters
+ 11 commands in batch file with spaces and tabs
+
+ 12 command contains only ";"
+ 13 command contains a serries of ";"s 
+ 14 multiple commands separted by ";"
+ 15 multiple commands with ";", tabs and spaces
+ 
+ 16 multiple commands separteds by series of ";" and spaces
+ 17 simple redirection with space
+ 18 multiple commands with simple redirection
+ 19 parallel commands: simple case
+  
+ 24 external command
+ 25 multiple command (;) with simple redirection
+ 27 pipe using "||" 
+
+ 28 pipe with simple redirection
+ 29 parallel commands: simple case
+ 31 echo with an argument
