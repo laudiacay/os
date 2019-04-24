@@ -27,7 +27,6 @@ void one_iter(char* cmd_input_buf, struct many_commands* cmds, int batch_mode,
                 return;
         }
         if (!write(STDOUT_FILENO, newline, strlen(newline))) return;
-        printf("?!?!?\n");
     }
 
     // go ahead and parse it
