@@ -12,7 +12,7 @@
 // so that we can put errors in the right place in the output
 void do_error(void) {
     char error_message[30] = "An error has occurred\n";
-    write(STDERR_FILENO, error_message, strlen(error_message));
+    if (!write(STDERR_FILENO, error_message, strlen(error_message))) return;
 }
 
 struct command* make_command(int argc, char** argv) {

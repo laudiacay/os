@@ -9,7 +9,10 @@ void quit() {
 
 void pwd() {
     char* cwd = malloc(MAX_PATH_LENGTH);
-    getcwd(cwd, MAX_PATH_LENGTH);
+    if (!getcwd(cwd, MAX_PATH_LENGTH)) {
+        do_error();
+        return;
+    }
     printf("%s\n", cwd);
     free(cwd);
 }

@@ -45,7 +45,10 @@ int* run_piped_redirect(struct redirect* redir, int* pid) {
 
 
     for (int i = 0; i < redir->commands->length - 1; i++) {
-        pipe(pipefd); // todo: check for failure here
+        if (pipe(pipefd)) {
+            do_error();
+            return NULL;
+        } 
         out = pipefd[1];
         dup2(out, 1);
         close(out);
@@ -102,7 +105,7 @@ int* run_redirect(struct redirect* redir, int* pid) {
     struct command* cmd = get_element(redir->commands, 0);
 
     if (redir->redir_type == '>') {
-        outfile = open(redir->out_file, O_CREAT|O_RDWR|O_TRUNC);
+        outfile = open(redir->out_file, O_CREAT|O_RDWR|O_TRUNC, 0600);
         if (outfile == -1) {
             do_error();
             exit(0);

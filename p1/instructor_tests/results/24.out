@@ -1,0 +1,3 @@
+grep 'include' para.c | head -2
+#include <unistd.h>
+#include <stdlib.h>

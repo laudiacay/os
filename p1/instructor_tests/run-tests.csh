@@ -29,6 +29,7 @@ foreach test ($list)
     
     # this is how you run the particular test
     (${scriptDir}/test${test}.csh > ${tmpFile}.out) >& ${tmpFile}.err
+    cp ${tmpFile}.out fuck.out
     set testStatus = $status
 
     # check for differences in output
