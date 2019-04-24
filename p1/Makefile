@@ -1,5 +1,5 @@
 CCBIN=/usr/bin/gcc
-CC=$(CCBIN) -Wall -Wextra -Werror -pedantic -g -fsanitize=address -fno-omit-frame-pointer
+CC=$(CCBIN) -Wall -Wextra -Werror -pedantic -g -fsanitize=address -fno-omit-frame-pointer -exitcode 0
 
 default: mysh
 
