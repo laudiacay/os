@@ -44,6 +44,7 @@ int main(int argc, char* argv[]) {
     // handle bad input
     if (argc > 2) {
         do_error();
+        printf("why aren't you erroring right you bastard\n");
         exit(1);
     }
 
