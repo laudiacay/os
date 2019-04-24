@@ -7,9 +7,14 @@
 // clear stdin, for when the input is too long (munch until you hit the end lol)
 void clear_stdin(int batch_mode, FILE* fp) {
     char c;
+    char* print_command_in_batch_mode;
     while (1) {
         if (!batch_mode) c = getchar();
-        else c = fgetc(fp);
+        else {
+            c = fgetc(fp);
+            print_command_in_batch_mode = &c;
+            write(STDOUT_FILENO, print_command_in_batch_mode, 1);
+        }
         if (c == EOF || c == '\n' || c == '\r') break;
     }
 }
@@ -46,7 +51,9 @@ char* read_until_newline(int batch_mode, FILE* fp) {
 
         // did we walk off the end of the buffer?
         // if so, clear stdin, free buf, error out, return NULL.
+        // if batch_mode, write it out to stdout. this is hack. ugh.
         if (i >= MAX_INPUT_LENGTH) {
+            if (!write(STDOUT_FILENO, cmd_input_buf, i-1)) return;
             clear_stdin(batch_mode, fp);
             free(cmd_input_buf);
             do_error();
