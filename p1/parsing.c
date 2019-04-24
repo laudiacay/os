@@ -54,7 +54,7 @@ char* read_until_newline(int batch_mode, FILE* fp) {
         // if so, clear stdin, free buf, error out, return NULL.
         // if batch_mode, write it out to stdout. this is hack. ugh.
         if (i >= MAX_INPUT_LENGTH) {
-            if (!write(STDOUT_FILENO, cmd_input_buf, i+1)) return NULL;
+            if (!write(STDOUT_FILENO, cmd_input_buf, i)) return NULL;
             clear_stdin(batch_mode, fp);
             free(cmd_input_buf);
             do_error();
