@@ -13,15 +13,17 @@ void one_iter(char* cmd_input_buf, struct many_commands* cmds, int batch_mode,
 
     char* newline = "\n";
 
-    if (!batch_mode) write(STDOUT_FILENO, prompt, strlen(prompt));
+    if (!batch_mode) {
+        if (!write(STDOUT_FILENO, prompt, strlen(prompt))) return;
+    }
 
     cmd_input_buf = read_until_newline(batch_mode, fp);
 
     if (!cmd_input_buf) return;
 
     if (batch_mode) {
-        write(STDOUT_FILENO, cmd_input_buf, strlen(cmd_input_buf));
-        write(STDOUT_FILENO, newline, strlen(newline));
+        if (!write(STDOUT_FILENO, cmd_input_buf, strlen(cmd_input_buf))) return;
+        if (!write(STDOUT_FILENO, newline, strlen(newline))) return;
     }
 
     // go ahead and parse it
