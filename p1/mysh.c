@@ -6,15 +6,23 @@
 #include "lib/utils.h"
 #include "lib/run.h"
 
+char* prompt = "520sh> ";
+
 void one_iter(char* cmd_input_buf, struct many_commands* cmds, int batch_mode,
         FILE* fp) {
-    if (!batch_mode) printf("520sh> ");
+
+    char* newline = "\n";
+
+    if (!batch_mode) write(STDOUT_FILENO, prompt, strlen(prompt));
 
     cmd_input_buf = read_until_newline(batch_mode, fp);
 
     if (!cmd_input_buf) return;
 
-    if (batch_mode) printf("%s\n", cmd_input_buf);
+    if (batch_mode) {
+        write(STDOUT_FILENO, cmd_input_buf, strlen(cmd_input_buf));
+        write(STDOUT_FILENO, newline, strlen(newline));
+    }
 
     // go ahead and parse it
     if (!(cmds = parse_input_buffer(cmd_input_buf))) {

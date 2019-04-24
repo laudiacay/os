@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <string.h>
 #include "lib/utils.h"
 
 void quit() {
@@ -8,12 +9,14 @@ void quit() {
 }
 
 void pwd() {
+    char* newline = "\n";
     char* cwd = malloc(MAX_PATH_LENGTH);
     if (!getcwd(cwd, MAX_PATH_LENGTH)) {
         do_error();
         return;
     }
-    printf("%s\n", cwd);
+    write(STDOUT_FILENO, cwd, strlen(cwd));
+    write(STDOUT_FILENO, newline, strlen(newline));
     free(cwd);
 }
 
@@ -25,5 +28,7 @@ void cd(char* dest) {
 }
 
 void echo(char* string) {
-    printf("%s\n", string);
+    char* newline = "\n";
+    write(STDOUT_FILENO, string, strlen(string));
+    write(STDOUT_FILENO, newline, strlen(newline));
 }
