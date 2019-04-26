@@ -208,6 +208,7 @@ struct command* command_from_string(char* in_buffer) {
         argv[i] = malloc(strlen(argv_i) + 1);
         // todo: catch this malloc failure
         strcpy(argv[i], argv_i);
+        free(argv_i);
     }
     // null terminate argv
     argv[argv_list->length] = NULL;
