@@ -150,6 +150,7 @@ struct list* tokenize_command(char* in_buf) {
             start_ptr += sizeof(char);
             end_ptr = start_ptr;
         }
+        if (start_ptr[0] == '\0') break;
         printf("start_ptr[0]: %c\n", start_ptr[0]);
         printf("end_ptr[0]: %c\n", end_ptr[0]);
         cur_char = end_ptr[0];
