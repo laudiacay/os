@@ -132,8 +132,8 @@ struct command* command_from_string(char* in_buffer) {
     char* token;
 
     token = strtok_r(in_buffer, delims, &saveptr);
+    if (token == NULL) return NULL; // empty cmd
     while (token != NULL) {
-        printf("token: %s\n", token);
         add_elem(argv_list, argv_list->length, token);
         token = strtok_r(NULL, delims, &saveptr);
     }
@@ -289,7 +289,7 @@ struct many_commands* parse_input_buffer(char* in_buffer) {
     many_coms->redirects = redirect_list;
     many_coms->join_type = join_type;
 
-    print_many_commands(many_coms);
+    //print_many_commands(many_coms);
 
     return many_coms;
 }
