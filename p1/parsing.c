@@ -190,7 +190,7 @@ struct list* tokenize_command(char* in_buf) {
             break;
         }
         else end_ptr += sizeof(char);
-        printf("%c\n", end_ptr[0])
+        printf("%c\n", end_ptr[0]);
     }
     return argv_list;
 }
