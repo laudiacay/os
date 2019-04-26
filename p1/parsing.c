@@ -188,7 +188,9 @@ struct list* tokenize_command(char* in_buf) {
             token = chop_out_string_portion(start_ptr, end_ptr);
             add_elem(argv_list, argv_list->length, token);
             break;
-        } else end_ptr += sizeof(char);
+        }
+        else end_ptr += sizeof(char);
+        printf("%c\n", end_ptr[0])
     }
     return argv_list;
 }
