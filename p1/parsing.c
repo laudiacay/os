@@ -220,6 +220,8 @@ struct redirect* build_pipe_redirect(char* input_string) {
     token = strtok_r(input_string, delims, &saveptr);
     while (token != NULL) {
         com = command_from_string(token);
+        printf("!!!");
+        print_command(com);
         if (!com) {
             // todo: what other cleanup?
             do_error();
