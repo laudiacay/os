@@ -132,7 +132,7 @@ char* chop_out_string_portion(char* start, char* end) {
         ret[i] = start[i];
     }
     ret[strlen] = '\0';
-    printf("chopped out: %s\n", ret);
+    //printf("chopped out: %s\n", ret);
     return ret;
 }
 
@@ -151,8 +151,8 @@ struct list* tokenize_command(char* in_buf) {
             end_ptr = start_ptr;
         }
         if (start_ptr[0] == '\0') break;
-        printf("start_ptr[0]: %c\n", start_ptr[0]);
-        printf("end_ptr[0]: %c\n", end_ptr[0]);
+        //printf("start_ptr[0]: %c\n", start_ptr[0]);
+        //printf("end_ptr[0]: %c\n", end_ptr[0]);
         cur_char = end_ptr[0];
         if (cur_char == '\'' && !in_single_quote) {
             in_single_quote = 1;
