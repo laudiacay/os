@@ -107,6 +107,7 @@ char which_redir_type(char* in_buffer) {
             }
         } i++;
     }
+    printf("")
     return redir_token;
 }
 
