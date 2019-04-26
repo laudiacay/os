@@ -26,7 +26,7 @@ int run_builtin(int argc, char** argv) {
             else cd(NULL);
         }
     } else if (!strcmp(argv[0], "echo")) {
-        if (argc != 2) do_error();
+        if (argc < 2) do_error();
         else echo(argv[1]);
     } else return 0;
 
@@ -48,7 +48,7 @@ int* run_piped_redirect(struct redirect* redir, int* pid) {
         if (pipe(pipefd)) {
             do_error();
             return NULL;
-        } 
+        }
         out = pipefd[1];
         dup2(out, 1);
         close(out);
