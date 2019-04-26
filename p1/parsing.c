@@ -179,56 +179,6 @@ struct list* tokenize_command(char* in_buf) {
             }
         }
     }
-
-/*
-    while (start_ptr < in_buf + strlen(in_buf)) {
-        while (start_ptr[0] == ' ' || start_ptr[0] == '\t') {
-            start_ptr += sizeof(char);
-            end_ptr = start_ptr;
-        }
-        if (start_ptr[0] == '\0') break;
-        //printf("start_ptr[0]: %c\n", start_ptr[0]);
-        //printf("end_ptr[0]: %c\n", end_ptr[0]);
-        cur_char = end_ptr[0];
-        if (cur_char == '\'' && !in_single_quote) {
-            in_single_quote = 1;
-            start_ptr = end_ptr + sizeof(char);
-            end_ptr = start_ptr;
-        }
-        else if (cur_char == '\'' && in_single_quote) {
-            in_single_quote = 0;
-            token = chop_out_string_portion(start_ptr, end_ptr);
-            add_elem(argv_list, argv_list->length, token);
-            start_ptr = end_ptr + sizeof(char);
-            end_ptr = start_ptr;
-        }
-        else if (cur_char == '\"' && !in_double_quote) {
-            in_double_quote = 1;
-            start_ptr = end_ptr + sizeof(char);
-            end_ptr = start_ptr;
-        }
-        else if (cur_char == '\"' && in_double_quote) {
-            in_double_quote = 0;
-            token = chop_out_string_portion(start_ptr, end_ptr);
-            add_elem(argv_list, argv_list->length, token);
-            start_ptr = end_ptr + sizeof(char);
-            end_ptr = start_ptr;
-        }
-        else if (cur_char == ' ' || cur_char == '\t') {
-            if (!in_single_quote && !in_double_quote) {
-                token = chop_out_string_portion(start_ptr, end_ptr);
-                add_elem(argv_list, argv_list->length, token);
-                start_ptr = end_ptr + sizeof(char);
-            } else end_ptr += sizeof(char);
-        }
-        else if (cur_char == '\0') {
-            token = chop_out_string_portion(start_ptr, end_ptr);
-            add_elem(argv_list, argv_list->length, token);
-            break;
-        }
-        else end_ptr += sizeof(char);
-        */
-    }
     return argv_list;
 }
 
