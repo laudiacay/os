@@ -147,9 +147,9 @@ struct list* tokenize_command(char* in_buf) {
     while (start_ptr < in_buf + strlen(in_buf)) {
         while (start_ptr[0] == ' ' || start_ptr[0] == '\t') {
             start_ptr += sizeof(char);
+            end_ptr = start_ptr;
         }
         printf("start_ptr[0]: %c\n", start_ptr[0]);
-        end_ptr = start_ptr;
         cur_char = end_ptr[0];
         if (cur_char == '\'' && !in_single_quote) {
             in_single_quote = 1;
