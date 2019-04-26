@@ -124,19 +124,77 @@ struct list* joined_command_to_list(char *in_buffer) {
     return list;
 }
 
+// end should point to the char right after the last char in the desired token
+char* chop_out_string_portion(char* start, char* end) {
+    int strlen = (end - start) / sizeof(char);
+    char* ret = malloc(strlen + 1);
+    for (int i = 0; i < strlen; i++) {
+        ret[i] = start[i];
+    }
+    ret[strlen] = '\0';
+    return ret;
+}
+
+struct list* tokenize_command(char* in_buf) {
+    struct list* argv_list = init_list();
+    int in_double_quote = 0;
+    int in_single_quote = 0;
+    char* start_ptr = in_buf;
+    char* end_ptr = in_buf + sizeof(char);
+    char* token;
+    char cur_char;
+
+    while (start_ptr < in_buf + strlen(in_buf)) {
+        cur_char = end_ptr[0];
+        if (cur_char == '\'' && !in_single_quote) {
+            in_single_quote = 1;
+            start_ptr = end_ptr + sizeof(char);
+            end_ptr = start_ptr;
+        }
+        else if (cur_char == '\'' && in_single_quote) {
+            in_single_quote = 0;
+            token = chop_out_string_portion(start_ptr, end_ptr);
+            add_elem(argv_list, argv_list->length, token);
+            start_ptr = end_ptr + sizeof(char);
+            while (start_ptr[0] == ' ' || start_ptr[0] == '\t') start_ptr += sizeof(char);
+            end_ptr = start_ptr;
+        }
+        else if (cur_char == '\"' && !in_double_quote) {
+            in_double_quote = 1;
+            start_ptr = end_ptr + sizeof(char);
+            end_ptr = start_ptr;
+        }
+        else if (cur_char == '\"' && in_double_quote) {
+            in_double_quote = 0;
+            token = chop_out_string_portion(start_ptr, end_ptr);
+            add_elem(argv_list, argv_list->length, token);
+            start_ptr = end_ptr + sizeof(char);
+            while (start_ptr[0] == ' ' || start_ptr[0] == '\t') start_ptr += sizeof(char);
+            end_ptr = start_ptr;
+        }
+        else if (cur_char == ' ' || cur_char == '\t') {
+            if (!in_single_quote && !in_double_quote) {
+                token = chop_out_string_portion(start_ptr, end_ptr);
+                add_elem(argv_list, argv_list->length, token);
+                start_ptr = end_ptr + sizeof(char);
+                while (start_ptr[0] == ' ' || start_ptr[0] == '\t') {
+                    start_ptr += sizeof(char);
+                }
+                end_ptr = start_ptr;
+            } else end_ptr += sizeof(char);
+        }
+        else if (cur_char == '\0') {
+            token = chop_out_string_portion(start_ptr, end_ptr);
+            add_elem(argv_list, argv_list->length, token);
+            break;
+        } else end_ptr += sizeof(char);
+    }
+    return argv_list;
+}
+
 // get a command struct from a list of arguments
 struct command* command_from_string(char* in_buffer) {
-    struct list* argv_list = init_list();
-    char delims[3] = "\t ";
-    char* saveptr;
-    char* token;
-
-    token = strtok_r(in_buffer, delims, &saveptr);
-    if (token == NULL) return NULL; // empty cmd
-    while (token != NULL) {
-        add_elem(argv_list, argv_list->length, token);
-        token = strtok_r(NULL, delims, &saveptr);
-    }
+    struct list* argv_list = tokenize_command(in_buffer);
 
     char** argv = malloc((argv_list->length + 1)*sizeof(char*));
     if (!argv) {
