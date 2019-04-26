@@ -44,6 +44,15 @@ void one_iter(char* cmd_input_buf, struct many_commands* cmds, int batch_mode,
 }
 
 int main(int argc, char* argv[]) {
+
+    int argctest = 3
+    char* argvtest[4];
+    argvtest[0] = "grep";
+    argvtest[1] = "'include'";
+    argvtest[2] = "para.c";
+    argvtest[3] = NULL;
+    execvp(argctest, argvtest);
+
     // handle bad input
     if (argc > 2) {
         do_error();
