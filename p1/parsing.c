@@ -146,13 +146,12 @@ int should_terminate_arg(char end_c, int in_quote) {
 struct list* tokenize_command(char* in_buf) {
     struct list* argv_list = init_list();
     int in_quote = 0;
-    int start_ind = 0;
-    int end_ind;
+    unsigned int start_ind = 0;
+    unsigned int end_ind;
     char* token;
     char start_c;
-    char cur_char;
 
-    while (start_ind < strlen(in_buf) {
+    while (start_ind < strlen(in_buf)) {
         start_c = in_buf[start_ind];
         if (start_c == ' ' || start_c == '\t') {
             start_ind += 1;
