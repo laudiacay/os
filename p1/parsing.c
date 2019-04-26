@@ -133,6 +133,7 @@ struct command* command_from_string(char* in_buffer) {
 
     token = strtok_r(in_buffer, delims, &saveptr);
     while (token != NULL) {
+        printf("token: %s\n", token);
         add_elem(argv_list, argv_list->length, token);
         token = strtok_r(NULL, delims, &saveptr);
     }
