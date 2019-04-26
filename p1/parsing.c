@@ -288,7 +288,7 @@ struct many_commands* parse_input_buffer(char* in_buffer) {
     many_coms->redirects = redirect_list;
     many_coms->join_type = join_type;
 
-    //print_many_commands(many_coms);
+    print_many_commands(many_coms);
 
     return many_coms;
 }
