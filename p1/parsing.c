@@ -262,8 +262,10 @@ struct redirect* build_pipe_redirect(char* input_string) {
 struct redirect* build_redirect(char* input_string) {
     char redir_type = which_redir_type(input_string);
     struct redirect* ret;
-    printf("%x\n", redir_type);
-    if (redir_type == 1) ret = NULL;
+    if (redir_type == 1) {
+        do_error();
+        ret = NULL;
+    }
     else if (redir_type == '>') ret = build_arrow_redirect(input_string);
     else if (redir_type == '|') ret = build_pipe_redirect(input_string);
     else {
