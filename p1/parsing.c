@@ -140,7 +140,7 @@ struct list* tokenize_command(char* in_buf) {
     int in_double_quote = 0;
     int in_single_quote = 0;
     char* start_ptr = in_buf;
-    char* end_ptr = in_buf + sizeof(char);
+    char* end_ptr = in_buf;
     char* token;
     char cur_char;
 
@@ -148,6 +148,7 @@ struct list* tokenize_command(char* in_buf) {
         while (start_ptr[0] == ' ' || start_ptr[0] == '\t') {
             start_ptr += sizeof(char);
         }
+        printf("start_ptr[0]: %c\n", start_ptr[0]);
         end_ptr = start_ptr;
         cur_char = end_ptr[0];
         if (cur_char == '\'' && !in_single_quote) {
