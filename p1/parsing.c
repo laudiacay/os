@@ -172,11 +172,26 @@ char* validate_and_clean_redir_filename(char* raw_filename) {
     return filename;
 }
 
+int catch_double_redirect(char* str, char redir_type) {
+    for (int i = 1; i < strlen(str); i++) {
+        if (str[i] == str[i-1] && str[i] == redir_type) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 struct redirect* build_arrow_redirect(char* input_string) {
     // breaks input string up into list of commands
     struct list* commands = init_list();
     char delims[2] = ">";
     char* saveptr;
+
+    // make sure there's no >> going on, strtok won't catch it
+    if catch_double_redirect(input_string, '>') {
+        do_error();
+        return NULL;
+    }
 
     // get input file and put it into commands list
     char* before_redir = strtok_r(input_string, delims, &saveptr);
@@ -217,11 +232,16 @@ struct redirect* build_pipe_redirect(char* input_string) {
     char* token;
     struct command* com;
 
+    // make sure there's no || going on, strtok won't catch it
+    if catch_double_redirect(input_string, '|') {
+        do_error();
+        return NULL;
+    }
+
     token = strtok_r(input_string, delims, &saveptr);
     while (token != NULL) {
         com = command_from_string(token);
-        printf("!!!");
-        print_command(com);
+
         if (!com) {
             // todo: what other cleanup?
             do_error();
