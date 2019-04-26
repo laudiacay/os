@@ -149,7 +149,7 @@ struct list* tokenize_command(char* in_buf) {
     unsigned int start_ind = 0;
     unsigned int end_ind;
     char* token;
-    char start_c;
+    char start_c, end_c;
 
     while (start_ind < strlen(in_buf)) {
         start_c = in_buf[start_ind];
@@ -164,7 +164,7 @@ struct list* tokenize_command(char* in_buf) {
             break;
         } else {
             end_ind = start_ind + 1;
-            end_c = in_buf[end_ind]
+            end_c = in_buf[end_ind];
             while (!should_terminate_arg(end_c, in_quote)) {
                 end_ind++;
                 end_c = in_buf[end_ind];
