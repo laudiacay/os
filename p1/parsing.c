@@ -98,7 +98,7 @@ char which_redir_type(char* in_buffer) {
     int i = 0;
     while (in_buffer[i] != '\0') {
         if (in_buffer[i] == '|' || in_buffer[i] == '>') { // found + or ;
-            printf("i: %d\nchar: %c\n", i, in_buffer[i]);
+            printf("rtok = %x\ni: %d\nchar: %x\n", redir_token, i, in_buffer[i]);
             if (redir_token == '\0') redir_token = in_buffer[i];
             // duplicate > or mismatched tokens
             else if (redir_token != in_buffer[i] || redir_token == '>') {
