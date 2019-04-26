@@ -132,6 +132,7 @@ char* chop_out_string_portion(char* start, char* end) {
         ret[i] = start[i];
     }
     ret[strlen] = '\0';
+    printf("chopped out: %s\n", ret);
     return ret;
 }
 
