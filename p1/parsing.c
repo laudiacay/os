@@ -189,7 +189,6 @@ struct redirect* build_arrow_redirect(char* input_string) {
 
     // make sure there's no >> going on, strtok won't catch it
     if (catch_double_redirect(input_string, '>')) {
-        printf("aylmao >\n");
         do_error();
         return NULL;
     }
@@ -235,7 +234,6 @@ struct redirect* build_pipe_redirect(char* input_string) {
 
     // make sure there's no || going on, strtok won't catch it
     if (catch_double_redirect(input_string, '|')) {
-        printf("aylmao |\n");
         do_error();
         return NULL;
     }
@@ -267,8 +265,9 @@ struct redirect* build_redirect(char* input_string) {
     else if (redir_type == '|') ret = build_pipe_redirect(input_string);
     else {
         struct list* commands = init_list();
-        add_elem(commands, 0, command_from_string(input_string));
-        // todo: catch if command_from_string failed;
+        struct command* cmd = command_from_string(input_string);
+        if (!cmd) return NULL;
+        add_elem(commands, 0, cmd);
         ret = make_redirect(commands, '\0', NULL);
     }
     return ret;
@@ -281,6 +280,7 @@ struct list* build_redirect_list(struct list* joined_strings) {
 
     for (int i = 0; i < joined_strings->length; i++) {
         redirect = build_redirect((char*)get_element(joined_strings, i));
+        if (!redirect) continue;
         add_elem(redir_list, redir_list->length, redirect);
     }
 
