@@ -125,26 +125,63 @@ struct list* joined_command_to_list(char *in_buffer) {
 }
 
 // end should point to the char right after the last char in the desired token
-char* chop_out_string_portion(char* start, char* end) {
-    int strlen = (end - start) / sizeof(char);
+char* chop_out_string_portion(char* str, int start, int end) {
+    int strlen = end - start;
     char* ret = malloc(strlen + 1);
     for (int i = 0; i < strlen; i++) {
-        ret[i] = start[i];
+        ret[i] = str[start + i];
     }
     ret[strlen] = '\0';
     //printf("chopped out: %s\n", ret);
     return ret;
 }
 
+int should_terminate_arg(char end_c, int in_quote) {
+    if (end_c == '\0') return 1;
+    if ((end_c == ' ' || end_c == '\t') && !in_quote) return 1;
+    if (end_c == '\'' || end_c == '"') return in_quote;
+    return 0;
+}
+
 struct list* tokenize_command(char* in_buf) {
     struct list* argv_list = init_list();
-    int in_double_quote = 0;
-    int in_single_quote = 0;
-    char* start_ptr = in_buf;
-    char* end_ptr = in_buf;
+    int in_quote = 0;
+    int start_ind = 0;
+    int end_ind;
     char* token;
+    char start_c;
     char cur_char;
 
+    while (start_ind < strlen(in_buf) {
+        start_c = in_buf[start_ind];
+        if (start_c == ' ' || start_c == '\t') {
+            start_ind += 1;
+            continue;
+        } else if (start_c == '\'' || start_c == '"') {
+            in_quote = 1;
+            start_ind += 1;
+            continue;
+        } else if (start_c == '\0') {
+            break;
+        } else {
+            end_ind = start_ind + 1;
+            end_c = in_buf[end_ind]
+            while (!should_terminate_arg(end_c, in_quote)) {
+                end_ind++;
+                end_c = in_buf[end_ind];
+            }
+            token = chop_out_string_portion(in_buf, start_ind, end_ind);
+            add_elem(argv_list, argv_list->length, token);
+            if (in_quote) {
+                start_ind = end_ind + 2;
+                in_quote = 0;
+            } else {
+                start_ind = end_ind + 1;
+            }
+        }
+    }
+
+/*
     while (start_ptr < in_buf + strlen(in_buf)) {
         while (start_ptr[0] == ' ' || start_ptr[0] == '\t') {
             start_ptr += sizeof(char);
@@ -191,6 +228,7 @@ struct list* tokenize_command(char* in_buf) {
             break;
         }
         else end_ptr += sizeof(char);
+        */
     }
     return argv_list;
 }
