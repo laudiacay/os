@@ -173,7 +173,7 @@ char* validate_and_clean_redir_filename(char* raw_filename) {
 }
 
 int catch_double_redirect(char* str, char redir_type) {
-    for (int i = 1; i < strlen(str); i++) {
+    for (unsigned int i = 1; i < strlen(str); i++) {
         if (str[i] == str[i-1] && str[i] == redir_type) {
             return 1;
         }
@@ -188,7 +188,7 @@ struct redirect* build_arrow_redirect(char* input_string) {
     char* saveptr;
 
     // make sure there's no >> going on, strtok won't catch it
-    if catch_double_redirect(input_string, '>') {
+    if (catch_double_redirect(input_string, '>')) {
         do_error();
         return NULL;
     }
@@ -233,7 +233,7 @@ struct redirect* build_pipe_redirect(char* input_string) {
     struct command* com;
 
     // make sure there's no || going on, strtok won't catch it
-    if catch_double_redirect(input_string, '|') {
+    if (catch_double_redirect(input_string, '|')) {
         do_error();
         return NULL;
     }
