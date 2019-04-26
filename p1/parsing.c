@@ -189,6 +189,7 @@ struct redirect* build_arrow_redirect(char* input_string) {
 
     // make sure there's no >> going on, strtok won't catch it
     if (catch_double_redirect(input_string, '>')) {
+        free_list(commands);
         do_error();
         return NULL;
     }
@@ -234,6 +235,7 @@ struct redirect* build_pipe_redirect(char* input_string) {
 
     // make sure there's no || going on, strtok won't catch it
     if (catch_double_redirect(input_string, '|')) {
+        free_list(commands);
         do_error();
         return NULL;
     }
