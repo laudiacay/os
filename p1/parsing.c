@@ -107,7 +107,7 @@ char which_redir_type(char* in_buffer) {
             }
         } i++;
     }
-    printf("")
+    printf("final rtok: %x\n", redir_token);
     return redir_token;
 }
 
