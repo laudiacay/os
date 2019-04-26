@@ -94,11 +94,9 @@ char which_join_type(char* in_buffer) {
 // returns | or > corresponding to which one we're using
 char which_redir_type(char* in_buffer) {
     char redir_token = '\0';
-    printf("which redir type on: %s\n", in_buffer);
     int i = 0;
     while (in_buffer[i] != '\0') {
         if (in_buffer[i] == '|' || in_buffer[i] == '>') { // found + or ;
-            printf("rtok = %x\ni: %d\nchar: %x\n", redir_token, i, in_buffer[i]);
             if (redir_token == '\0') redir_token = in_buffer[i];
             // duplicate > or mismatched tokens
             else if (redir_token != in_buffer[i] || redir_token == '>') {
@@ -107,7 +105,6 @@ char which_redir_type(char* in_buffer) {
             }
         } i++;
     }
-    printf("final rtok: %x\n", redir_token);
     return redir_token;
 }
 
@@ -265,7 +262,8 @@ struct redirect* build_pipe_redirect(char* input_string) {
 struct redirect* build_redirect(char* input_string) {
     char redir_type = which_redir_type(input_string);
     struct redirect* ret;
-    if (redir_type == '\1') ret = NULL;
+    printf("%x\n", redir_type);
+    if (redir_type == 1) ret = NULL;
     else if (redir_type == '>') ret = build_arrow_redirect(input_string);
     else if (redir_type == '|') ret = build_pipe_redirect(input_string);
     else {
