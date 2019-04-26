@@ -94,6 +94,7 @@ char which_join_type(char* in_buffer) {
 // returns | or > corresponding to which one we're using
 char which_redir_type(char* in_buffer) {
     char redir_token = '\0';
+    printf("which redir type on: %s\n", in_buffer);
     int i = 0;
     while (in_buffer[i] != '\0') {
         if (in_buffer[i] == '|' || in_buffer[i] == '>') { // found + or ;
