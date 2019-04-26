@@ -151,6 +151,7 @@ struct list* tokenize_command(char* in_buf) {
             end_ptr = start_ptr;
         }
         printf("start_ptr[0]: %c\n", start_ptr[0]);
+        printf("end_ptr[0]: %c\n", end_ptr[0]);
         cur_char = end_ptr[0];
         if (cur_char == '\'' && !in_single_quote) {
             in_single_quote = 1;
@@ -189,7 +190,6 @@ struct list* tokenize_command(char* in_buf) {
             break;
         }
         else end_ptr += sizeof(char);
-        printf("%c\n", end_ptr[0]);
     }
     return argv_list;
 }
