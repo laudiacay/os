@@ -162,7 +162,6 @@ struct list* tokenize_command(char* in_buf) {
             token = chop_out_string_portion(start_ptr, end_ptr);
             add_elem(argv_list, argv_list->length, token);
             start_ptr = end_ptr + sizeof(char);
-            while (start_ptr[0] == ' ' || start_ptr[0] == '\t') start_ptr += sizeof(char);
             end_ptr = start_ptr;
         }
         else if (cur_char == '\"' && !in_double_quote) {
@@ -175,7 +174,6 @@ struct list* tokenize_command(char* in_buf) {
             token = chop_out_string_portion(start_ptr, end_ptr);
             add_elem(argv_list, argv_list->length, token);
             start_ptr = end_ptr + sizeof(char);
-            while (start_ptr[0] == ' ' || start_ptr[0] == '\t') start_ptr += sizeof(char);
             end_ptr = start_ptr;
         }
         else if (cur_char == ' ' || cur_char == '\t') {
