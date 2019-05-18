@@ -1,0 +1,26 @@
+I worked alone. I believe all features work, because I pass all the provided tests.
+
+
+To test my code:
+i'll call this directory $p2dir, start in this directory.
+
+cp $(location of p2test.tar) .
+tar -xvf p2test.tar
+cp release/* p2dir
+
+# go into test.csh, uncomment lines 10 and 12, set test_input_dir = $p2dir
+
+./run_all_tests.csh
+# passes everything! :)
+
+
+to stress-test my code:
+# still in $p2dir
+cp *.c stress-test/
+cp *.h stress-test/
+cd stress-test/
+make
+./testCounter
+./testList
+./testHash
+# passes everything! :)
