@@ -2,27 +2,28 @@ CCBIN = gcc
 CCFAST=$(CCBIN) -Wall -Wextra -Werror -pedantic -g -std=gnu99 -lpthread -pthread
 CCSLOW=$(CCFAST) -fsanitize=address -fno-omit-frame-pointer
 CC=$(CCFAST)
+SERVEROBJECTS=fsops.o directory.o inode.o dblock.o bitmap.o
 
 default: all
 
-all: server libmfs.so
+all: server mytest libmfs.so
 
 # this generates the target executables
-server: server.o udp.o
-	$(CC) -o server server.o udp.o
+server: server.o udp.o $(SERVEROBJECTS) libmfs.so
+	$(CC) -o server server.o udp.o $(SERVEROBJECTS) -lexplain
 
-#client: client.o udp.o
-#	$(CC) -o client client.o udp.o
+mytest: mytest.o udp.o libmfs.so
+	$(CC) -o mytest mytest.o udp.o -L. -lmfs
 
 libmfs.so: mfs.h mfs.o
 	$(CC) -shared -Wl,-soname,libmfs.so mfs.h mfs.o -o libmfs.so
 
 mfs.o: mfs.h mfs.c
-	$(CCBIN) mfs.c -c -fPIC
+	$(CC) mfs.c -c -fPIC
 
 # this is a generic rule for .o files
 %.o: %.c
-	$(CCBIN) -c $< -o $@
+	$(CC) -c $< -o $@
 
 clean:
-	rm -f *.o *.so* server
+	rm -f *.o *.so* server mytest *.pyc *.fs

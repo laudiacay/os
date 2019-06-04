@@ -37,6 +37,8 @@
 #define SUBDIR_BITMAP_SIZE 20
 #define MAX_NUM_SUBDIRS 159
 
+#define UNUSED(x) (void)(x)
+
 typedef struct __MFS_Stat_t {
   int type;   // MFS_DIRECTORY or MFS_REGULAR
   int size;   // bytes

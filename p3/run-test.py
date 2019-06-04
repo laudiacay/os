@@ -52,7 +52,9 @@ def run_test(testcase):
 
         status, out = commands.getstatusoutput("./testclient %s %s"
                                                % (port, host))
-#        print out
+        # EDIT!!!!!
+        print(out)
+        #/EDIT!!!!!
         commands.getoutput("killall -9 server")
         return status
 

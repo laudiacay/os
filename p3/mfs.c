@@ -18,9 +18,9 @@ int do_send() {
     int rc = UDP_Write(sd, &addr, buffer, BUFFER_SIZE);
     if (rc > 0) {
 	    rc = UDP_Read(sd, &addr2, buffer, BUFFER_SIZE);
-	    printf("CLIENT:: read %d bytes (message: '%s')\n", rc, buffer);
+	    //printf("CLIENT:: read %d bytes (message: '%s')\n", rc, buffer);
     }
-    return 0;
+    return rc;
 }
 
 int MFS_Init(char *hostname, int port) {
@@ -28,17 +28,19 @@ int MFS_Init(char *hostname, int port) {
     assert(sd > -1);
 
     int rc = UDP_FillSockAddr(&addr, hostname, port);
+
     return rc;
 }
 
-// TODO: parse message out, return it
 int MFS_Lookup(int pinum, char *name) {
     char cmd_type = MFS_LOOKUP;
     memcpy(&buffer[0], &cmd_type, 1);
     memcpy(&buffer[1], &pinum, sizeof(int));
     strncpy(&buffer[1+sizeof(int)], name, MAX_FILENAME_SIZE);
     do_send();
-    return 0;
+    int ret;
+    memcpy(&ret, &buffer[1], sizeof(int));
+    return ret;
 }
 
 // TODO: parse message out, return code
@@ -46,6 +48,7 @@ int MFS_Stat(int inum, MFS_Stat_t *m) {
     char cmd_type = MFS_STAT;
     memcpy(&buffer[0], &cmd_type, 1);
     memcpy(&buffer[1], &inum, sizeof(int));
+    UNUSED(m);
     do_send();
     return 0;
 }
@@ -71,7 +74,6 @@ int MFS_Read(int inum, char *buffer, int block) {
     return 0;
 }
 
-// TODO: parse message out, return code
 int MFS_Creat(int pinum, int type, char *name) {
     char cmd_type = MFS_CREAT;
     memcpy(&buffer[0], &cmd_type, 1);
@@ -79,6 +81,9 @@ int MFS_Creat(int pinum, int type, char *name) {
     memcpy(&buffer[1+sizeof(int)], &type, sizeof(int));
     strncpy(&buffer[1+2*sizeof(int)], name, MAX_FILENAME_SIZE);
     do_send();
+    int ret;
+    memcpy(&ret, &buffer[1], sizeof(int));
+    return ret;
     return 0;
 }
 
