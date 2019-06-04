@@ -31,11 +31,8 @@
 #define INODE_TABLE_LOC (DBLOCK_BITMAP_LOC + BITMAP_SIZE)
 #define DATA_REGION_LOC (INODE_TABLE_LOC + INODE_T_SIZE * NUM_BLOCKS)
 
-// start with 20 byte bitmap of what DirEnts are taken
-// this will be at start of first 256-byte block
 #define SUBDIR_SIZE 256
-#define SUBDIR_BITMAP_SIZE 20
-#define MAX_NUM_SUBDIRS 159
+#define MAX_NUM_SUBDIRS 160
 
 #define UNUSED(x) (void)(x)
 

@@ -14,54 +14,62 @@ void dirent_seek_loc(int fd, int bnum, int boff) {
     lseek(fd, boff * SUBDIR_SIZE, SEEK_CUR);
 }
 
-int dirent_in_use(int fd, MFS_INode_t* inode, int dirent) {
+int dirent_in_use(int fd, MFS_INode_t* inode, int dnum) {
     assert(inode);
     assert(inode->stat_info.type == MFS_DIRECTORY);
-    dblock_seek_loc(fd, inode->block_nums[0]);
-    return bitmap_get_bit(fd, dirent);
+    int bnum = dnum / 16;
+    int boff = dnum % 16;
+    if (bnum > inode->stat_info.blocks) return 0;
+    dirent_seek_loc(fd, inode->block_nums[bnum], boff);
+    MFS_DirEnt_t dirent;
+    read(fd, &dirent, sizeof(MFS_DirEnt_t));
+    return dirent.inum != -1;
 }
 
 int get_first_free_dirent(int fd, MFS_INode_t* inode) {
     assert(inode);
     assert(inode->stat_info.type == MFS_DIRECTORY);
-    dblock_seek_loc(fd, inode->block_nums[0]);
-    return bitmap_find_first_free(fd, SUBDIR_BITMAP_SIZE);
-}
+    for (unsigned int i = 0; i < inode->stat_info.size/sizeof(MFS_DirEnt_t); i++) {
+        if (dirent_in_use(fd, inode, i)) continue;
+        return i;
+    }
+    if (inode->stat_info.size/sizeof(MFS_DirEnt_t) == MAX_NUM_SUBDIRS)
+        return -1;
 
-void set_dirent_use(int fd, MFS_INode_t* inode, int dirent, int val) {
-    assert(inode);
-    assert(inode->stat_info.type == MFS_DIRECTORY);
-    dblock_seek_loc(fd, inode->block_nums[0]);
-    bitmap_set_bit(fd, dirent, val);
+    return inode->stat_info.size/sizeof(MFS_DirEnt_t);
 }
 
 // adds direntry to p's directory table
 void add_direntry(int fd, int pinum, int inum, char* name) {
-    //printf("in add_direntry pinum %d inum %d name %s\n", pinum, inum, name);
+    printf("in add_direntry pinum %d inum %d name %s\n", pinum, inum, name);
 
     MFS_INode_t* inode = get_inode(fd, pinum);
     assert(inode);
-    //printf("got the pinode\n");
+    printf("got the pinode\n");
     int n_blocks = inode->stat_info.blocks;
 
     int first_free = get_first_free_dirent(fd, inode);
-    //printf("first free dirent: %d\n", first_free);
-    set_dirent_use(fd, inode, first_free, 1);
+    printf("first free dirent: %d\n", first_free);
 
-    int dir_bnum = (first_free + 1) / 16;
-    int dir_boff = (first_free + 1) % 16;
+    int dir_bnum = first_free / 16;
+    int dir_boff = first_free % 16;
 
     assert(dir_bnum < 10);
 
-    //printf("bnum: %d, boff: %d\n", dir_bnum, dir_boff);
+    printf("bnum: %d, boff: %d\n", dir_bnum, dir_boff);
 
     if (dir_bnum >= n_blocks) {
-        //printf("should not be here yet!\n");
+        printf("incrementing blocks\n");
         int new_dblock = dblock_find_space(fd);
         dblock_set_use(fd, new_dblock, 1);
         inode->block_nums[n_blocks] = new_dblock;
         inode->stat_info.blocks += 1;
+        printf("num blocks is %d\n", inode->stat_info.blocks);
+    }
+    if ((first_free+1)*sizeof(MFS_DirEnt_t) > (unsigned int) inode->stat_info.size) {
+        printf("incrementing size\n");
         inode->stat_info.size += SUBDIR_SIZE;
+        printf("size is %d\n", inode->stat_info.size);
     }
 
     MFS_DirEnt_t dirent;
@@ -72,13 +80,13 @@ void add_direntry(int fd, int pinum, int inum, char* name) {
     dirent_seek_loc(fd, inode->block_nums[dir_bnum], dir_boff);
     write(fd, &dirent, sizeof(MFS_DirEnt_t));
 
-    //printf("wrote new dirent!\n");
+    printf("wrote new dirent!\n");
 
     // write inode
     inode_seek_loc(fd, pinum);
     write(fd, inode, sizeof(MFS_INode_t));
 
-    //printf("wrote new inode!\n");
+    printf("wrote new inode!\n");
 
     free(inode);
     fsync(fd);
@@ -94,13 +102,9 @@ void defrag_directory(int fd, int inum) {
 int init_first_block(int fd) {
     //printf("in init_first_block\n");
     // create first block bitmap, write first block
-    char* bitmap = calloc(SUBDIR_BITMAP_SIZE, sizeof(char));
     int dblock = dblock_find_space(fd);
     //printf("using dblock %d\n", dblock);
     dblock_set_use(fd, dblock, 1);
-
-    dblock_seek_loc(fd, dblock);
-    write(fd, bitmap, SUBDIR_BITMAP_SIZE);
     fsync(fd);
     //printf("initialized first block!\n");
     return dblock;
@@ -114,8 +118,8 @@ void init_dir_inode(int fd, int inum) {
 
     MFS_INode_t inode;
     inode.stat_info.type = MFS_DIRECTORY;
-    inode.stat_info.size = 3*SUBDIR_SIZE;
-    inode.stat_info.blocks = 1;
+    inode.stat_info.size = 0;
+    inode.stat_info.blocks = 0;
 
     int first_dblock = init_first_block(fd);
 
@@ -148,8 +152,10 @@ void make_dir(int fd, int pinum, int inum, char* name) {
 int dir_is_empty(int fd, int inum) {
     MFS_INode_t* inode = get_inode(fd, inum);
     assert(inode->stat_info.type == MFS_DIRECTORY);
-    dblock_seek_loc(fd, inode->block_nums[0]);
-    return bitmap_is_empty(fd, SUBDIR_BITMAP_SIZE);
+    for (unsigned int i = 0; i < inode->stat_info.size/sizeof(MFS_DirEnt_t); i++) {
+        if (dirent_in_use(fd, inode, i)) return 0;
+    }
+    return 1;
 }
 
 /*

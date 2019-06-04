@@ -72,7 +72,7 @@ void bitmap_set_bit(int fd, int offset, int val) {
 
     int byte_num = offset/8;
     int byte_offset = offset % 8;
-    //errno = 0;
+    errno = 0;
     //printf("setting bit at offset %d\n", offset);
     //printf("byte_num: %d\n", byte_num);
     //printf("byte_offset %d\n", byte_offset);
@@ -91,11 +91,20 @@ void bitmap_set_bit(int fd, int offset, int val) {
 
     //printf("writing byte_buf: ");
     //print_bits(byte_buf);
+    //printf("%s\n", strerror(errno));
 
     lseek(fd, save_offset, SEEK_SET);
+    //printf("after lseeking back to write %s\n", strerror(errno));
     write(fd, &byte_buf, 1);
-
+    //printf("after writing %s\n", strerror(errno));
     fsync(fd);
+    //printf("after fsync %s\n", strerror(errno));
+    lseek(fd, save_offset, SEEK_SET);
+    //printf("after lseeking to read %s\n", strerror(errno));
+    read(fd, &byte_buf, 1);
+    //printf("after reading %s\n", strerror(errno));
+    //print_bits(byte_buf);
+    //printf("after printing bits %s\n", strerror(errno));
 }
 
 // file descriptor should be set to start of bitmap in question

@@ -48,12 +48,13 @@ int MFS_Stat(int inum, MFS_Stat_t *m) {
     char cmd_type = MFS_STAT;
     memcpy(&buffer[0], &cmd_type, 1);
     memcpy(&buffer[1], &inum, sizeof(int));
-    UNUSED(m);
     do_send();
-    return 0;
+    int ret;
+    memcpy(&ret, &buffer[1], sizeof(int));
+    if (ret == 0) memcpy(m, &buffer[1+sizeof(int)], sizeof(MFS_Stat_t));
+    return ret;
 }
 
-// TODO: parse message out, return code
 int MFS_Write(int inum, char *block_buf, int block) {
     char cmd_type = MFS_WRITE;
     memcpy(&buffer[0], &cmd_type, 1);
@@ -61,7 +62,9 @@ int MFS_Write(int inum, char *block_buf, int block) {
     memcpy(&buffer[1+sizeof(int)], &block, sizeof(int));
     memcpy(&buffer[1+2*sizeof(int)], block_buf, MFS_BLOCK_SIZE);
     do_send();
-    return 0;
+    int ret;
+    memcpy(&ret, &buffer[1], sizeof(int));
+    return ret;
 }
 
 // TODO: parse message out, return code
@@ -84,7 +87,6 @@ int MFS_Creat(int pinum, int type, char *name) {
     int ret;
     memcpy(&ret, &buffer[1], sizeof(int));
     return ret;
-    return 0;
 }
 
 // TODO: parse message out, return code

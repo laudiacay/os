@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     int result_buf;
     char blockbuffer_buf[MFS_BLOCK_SIZE];
     char name_buf[MAX_FILENAME_SIZE];
-    //MFS_Stat_t statinfo_buf;
+    MFS_Stat_t statinfo_buf;
 
     fd = open_create_filesystem_image(argv[2]);
 
@@ -42,13 +42,19 @@ int main(int argc, char *argv[]) {
                     break;
                 case MFS_STAT:
                     memcpy(&inum_buf, &buffer[1], sizeof(int));
-                    printf("MFS_Stat(%d)\n", inum_buf);
+                    result_buf = mfs_stat(fd, inum_buf, &statinfo_buf);
+                    memcpy(&buffer[1], &result_buf, sizeof(int));
+                    memcpy(&buffer[1+sizeof(int)], &statinfo_buf, sizeof(MFS_Stat_t));
+                    rc = UDP_Write(sd, &s, buffer, BUFFER_SIZE);
                     break;
                 case MFS_WRITE:
                     memcpy(&inum_buf, &buffer[1], sizeof(int));
                     memcpy(&block_buf, &buffer[1+sizeof(int)], sizeof(int));
                     memcpy(blockbuffer_buf, &buffer[1+2*sizeof(int)], MFS_BLOCK_SIZE);
-                    printf("MFS_Write(%d, %d, %s)\n", inum_buf, block_buf, blockbuffer_buf);
+                    result_buf = mfs_write(fd, inum_buf, block_buf, blockbuffer_buf);
+                    printf("result: %d\n", result_buf);
+                    memcpy(&buffer[1], &result_buf, sizeof(int));
+                    rc = UDP_Write(sd, &s, buffer, BUFFER_SIZE);
                     break;
                 case MFS_READ:
                     memcpy(&inum_buf, &buffer[1], sizeof(int));
@@ -59,7 +65,6 @@ int main(int argc, char *argv[]) {
                     memcpy(&inum_buf, &buffer[1], sizeof(int));
                     memcpy(&type_buf, &buffer[1+sizeof(int)], sizeof(int));
                     strncpy(name_buf, &buffer[1+2*sizeof(int)], MAX_FILENAME_SIZE);
-                    //printf("MFS_Creat(%d, %d, %s)\n", inum_buf, type_buf, name_buf);
                     result_buf = mfs_creat(fd, inum_buf, type_buf, name_buf);
                     memcpy(&buffer[1], &result_buf, sizeof(int));
                     rc = UDP_Write(sd, &s, buffer, BUFFER_SIZE);
