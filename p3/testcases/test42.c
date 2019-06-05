@@ -13,15 +13,14 @@ int main(int argc, char* argv[]) {
   MFS_Stat_t m;
   int rc = MFS_Stat(0, &m);
   if (rc == -1) {
-    printf("FAILED");
+    printf("FAILED 1");
     return -1;
   }
   if (m.size != sizeof(MFS_DirEnt_t) * 2 || m.type != MFS_DIRECTORY ||
       m.blocks != 1) {
-    printf("FAILED");
+    printf("FAILED 2");
     return -1;
   }
   printf("PASSED");
   return 0;
 }
-

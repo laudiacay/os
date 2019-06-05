@@ -23,7 +23,7 @@ int dirent_in_use(int fd, MFS_INode_t* inode, int dnum) {
     dirent_seek_loc(fd, inode->block_nums[bnum], boff);
     MFS_DirEnt_t dirent;
     read(fd, &dirent, sizeof(MFS_DirEnt_t));
-    printf("dirent.inum: %d\n", dirent.inum);
+    //printf("dirent.inum: %d\n", dirent.inum);
     return dirent.inum != -1;
 }
 
@@ -102,16 +102,16 @@ void defrag_directory(int fd, int inum) {
     int num_empty_dirent_inds = 0;
     int new_num_dirents = inode->stat_info.size/sizeof(MFS_DirEnt_t);
     for (unsigned int i = 2; i < inode->stat_info.size/sizeof(MFS_DirEnt_t); i++) {
-        printf("checking dirent %u\n", i);
+        //printf("checking dirent %u\n", i);
         if (dirent_in_use(fd, inode, i)) {
-            printf("in use\n");
+            //printf("in use\n");
             if (last_empty_dirent == num_empty_dirent_inds) continue;
             dirent_seek_loc(fd, inode->block_nums[i/16], i % 16);
             read(fd, &dirent, sizeof(MFS_DirEnt_t));
             dest = empty_dirent_inds[last_empty_dirent];
             dirent_seek_loc(fd, inode->block_nums[dest/16], dest % 16);
             write(fd, &dirent, sizeof(MFS_DirEnt_t));
-            printf("copied into %d\n", dest);
+            //printf("copied into %d\n", dest);
             last_empty_dirent++;
         } else {
             empty_dirent_inds[num_empty_dirent_inds] = i;
@@ -189,7 +189,7 @@ int dir_is_empty(int fd, int inum) {
     MFS_INode_t* inode = get_inode(fd, inum);
     assert(inode->stat_info.type == MFS_DIRECTORY);
     for (unsigned int i = 2; i < inode->stat_info.size/sizeof(MFS_DirEnt_t); i++) {
-        printf("checking dirent %u\n", i);
+        //printf("checking dirent %u\n", i);
         if (dirent_in_use(fd, inode, i)) return 0;
     }
     return 1;

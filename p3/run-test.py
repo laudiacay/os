@@ -52,9 +52,7 @@ def run_test(testcase):
 
         status, out = commands.getstatusoutput("./testclient %s %s"
                                                % (port, host))
-        # EDIT!!!!!
         print(out)
-        #/EDIT!!!!!
         commands.getoutput("killall -9 server")
         return status
 
@@ -104,8 +102,12 @@ def run_test(testcase):
             return -1
         clientout = "out.txt"
         commands.getoutput("rm -rf out.txt")
-        os.system("./testclient %s %s > %s &" % (port, host, clientout))
+
+        #os.system("./testclient %s %s > %s &" % (port, host, clientout))
+        os.system("./testclient %s %s&" % (port, host))
+
         time.sleep(ctimeout/2)
+
         rc = util.start_fresh_server(port)
         if rc == -1:
             return -1

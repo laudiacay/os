@@ -1,4 +1,8 @@
 #include <stdio.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "udp.h"
 #include "mfs.h"
 
@@ -12,7 +16,7 @@ int sd;
 struct sockaddr_in addr, addr2;
 fd_set set;
 
-struct timeval timeout = {5,0};
+struct timeval timeout;
 
 // TODO: retries, timeouts
 int do_send() {
@@ -21,16 +25,16 @@ int do_send() {
     if (rc > 0) {
         FD_ZERO(&set);
         FD_SET(sd, &set);
-        rc = select(sd+1, &set, NULL, NULL, &timeout);
+        timeout.tv_sec = 1;
+        timeout.tv_usec = 0;
+        rc = UDP_Read(sd, &addr2, buffer, BUFFER_SIZE);
         if (rc == -1) {
-            printf("select error\n");
             return -2;
         }
         if (rc == 0) {
-            printf("timeout\n");
-            return -2;
+            printf("timeout, retry\n");
+            do_send();
         }
-	    rc = UDP_Read(sd, &addr2, buffer, BUFFER_SIZE);
     }
     return rc;
 }

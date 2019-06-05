@@ -23,15 +23,12 @@ int main(int argc, char *argv[]) {
     char blockbuffer_buf[MFS_BLOCK_SIZE];
     char name_buf[MAX_FILENAME_SIZE];
     MFS_Stat_t statinfo_buf;
-
     fd = open_create_filesystem_image(argv[2]);
 
     char buffer[BUFFER_SIZE];
-
     while (1) {
 	    int rc = UDP_Read(sd, &s, buffer, BUFFER_SIZE);
 	    if (rc > 0) {
-            //printf("%c\n", buffer[0]);
 	        switch (buffer[0]) {
                 case MFS_LOOKUP:
                     memcpy(&inum_buf, &buffer[1], sizeof(int));
