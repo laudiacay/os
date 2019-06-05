@@ -52,14 +52,19 @@ int main(int argc, char *argv[]) {
                     memcpy(&block_buf, &buffer[1+sizeof(int)], sizeof(int));
                     memcpy(blockbuffer_buf, &buffer[1+2*sizeof(int)], MFS_BLOCK_SIZE);
                     result_buf = mfs_write(fd, inum_buf, block_buf, blockbuffer_buf);
-                    printf("result: %d\n", result_buf);
+                    //printf("result: %d\n", result_buf);
                     memcpy(&buffer[1], &result_buf, sizeof(int));
                     rc = UDP_Write(sd, &s, buffer, BUFFER_SIZE);
                     break;
                 case MFS_READ:
                     memcpy(&inum_buf, &buffer[1], sizeof(int));
                     memcpy(&block_buf, &buffer[1+sizeof(int)], sizeof(int));
-                    printf("MFS_Read(%d, %d)\n", inum_buf, block_buf);
+                    //printf("MFS_Read(%d, %d)\n", inum_buf, block_buf);
+                    result_buf = mfs_read(fd, inum_buf, block_buf, blockbuffer_buf);
+                    memcpy(&buffer[1], &result_buf, sizeof(int));
+                    if (result_buf != -1)
+                        memcpy(&buffer[1+sizeof(int)], blockbuffer_buf, MFS_BLOCK_SIZE);
+                    rc = UDP_Write(sd, &s, buffer, BUFFER_SIZE);
                     break;
                 case MFS_CREAT:
                     memcpy(&inum_buf, &buffer[1], sizeof(int));
@@ -72,7 +77,9 @@ int main(int argc, char *argv[]) {
                 case MFS_UNLINK:
                     memcpy(&inum_buf, &buffer[1], sizeof(int));
                     strncpy(name_buf, &buffer[1+sizeof(int)], MAX_FILENAME_SIZE);
-                    printf("MFS_Unlink(%d, %s)\n", inum_buf, name_buf);
+                    result_buf = mfs_unlink(fd, inum_buf, name_buf);
+                    memcpy(&buffer[1], &result_buf, sizeof(int));
+                    rc = UDP_Write(sd, &s, buffer, BUFFER_SIZE);
                     break;
             }
             //strncpy(buffer, "ok", BUFFER_SIZE);

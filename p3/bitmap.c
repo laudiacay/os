@@ -112,6 +112,7 @@ void bitmap_set_bit(int fd, int offset, int val) {
 // return -1 if nothing found
 // TODO test me
 int bitmap_find_first_free(int fd, int max_size) {
+    //printf("BITMAP FIND FIRST FREE CALL\n");
     int bytes = max_size / 8;
     if (max_size % 8) bytes += 1;
     char byte_buf;
@@ -121,13 +122,18 @@ int bitmap_find_first_free(int fd, int max_size) {
         read(fd, &byte_buf, 1);
         //printf("read byte:\n");
         //print_bits(byte_buf);
-        if (byte_buf == 0xF) continue;
+        if (byte_buf == ~0) {
+            //printf("2big\n");
+            continue;
+        }
         //printf("found something open in bit %d! ", b_num);
         //print_bits(byte_buf);
         break;
     }
     if (byte_buf != 0xF) {
         //printf("yeahhh\n");
+        //printf("right byte:");
+        //print_bits(byte_buf);
         for (b_off = 0; b_off < 8; b_off++) {
             if (!((byte_buf >> (7-b_off)) & 1)) {
                 assert(b_num * 8 + b_off < max_size);

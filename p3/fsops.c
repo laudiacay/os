@@ -84,9 +84,9 @@ int mfs_lookup(int fd, int pinum, char* name) {
     }
     int bnum, boff;
     for (int i = 0; i < inode->stat_info.size/SUBDIR_SIZE; i++) {
-        printf("dirent %d\n", i);
+        //printf("dirent %d\n", i);
         if (!dirent_in_use(fd, inode, i)) {
-            printf("not in use\n");
+            //printf("not in use\n");
             continue;
         }
         else {
@@ -94,7 +94,7 @@ int mfs_lookup(int fd, int pinum, char* name) {
             boff = i % 16;
             dirent_seek_loc(fd, inode->block_nums[bnum], boff);
             read(fd, &dirent, sizeof(MFS_DirEnt_t));
-            printf("%s\n", dirent.name);
+            //printf("%s\n", dirent.name);
             if (strcmp(dirent.name, name) != 0) continue;
             ret = dirent.inum;
             break;
@@ -145,8 +145,8 @@ int mfs_stat(int fd, int inum, MFS_Stat_t* statinfo_buf) {
     if (inode_get_use(fd, inum) != 1) return -1;
     inode_seek_loc(fd, inum);
     read(fd, statinfo_buf, sizeof(MFS_Stat_t));
-    printf("read in!\n");
-    printf("type: %d, size: %d, blocks %d\n", statinfo_buf->type, statinfo_buf->size, statinfo_buf->blocks);
+    //printf("read in!\n");
+    //printf("type: %d, size: %d, blocks %d\n", statinfo_buf->type, statinfo_buf->size, statinfo_buf->blocks);
     return 0;
 }
 
@@ -157,7 +157,7 @@ int mfs_write(int fd, int inum, int block, char* buffer) {
     if (block >= 10) return -1;
     if (block < 0) return -1;
     MFS_INode_t* inode = get_inode(fd, inum);
-    printf("ptr: %ld\n", (long int)inode);
+    //printf("ptr: %ld\n", (long int)inode);
     if (!inode) return -1;
     if (inode->stat_info.type == MFS_DIRECTORY) {
         free(inode);
@@ -173,7 +173,94 @@ int mfs_write(int fd, int inum, int block, char* buffer) {
 
     dblock_seek_loc(fd, inode->block_nums[block]);
     write(fd, buffer, MFS_BLOCK_SIZE);
-
+    free(inode);
     fsync(fd);
+    return 0;
+}
+
+
+/*int MFS_Read(int inum, char *buffer, int block): MFS_Read() reads a block specified by block into the buffer from file specified by inum . The routine should work for either a file or directory; directories should return data in the format specified by MFS_DirEnt_t. Success: 0, failure: -1. Failure modes: invalid inum, invalid block.
+*/
+int mfs_read(int fd, int inum, int block, char* buffer) {
+    if (block >= 10) return -1;
+    if (block < 0) return -1;
+    if (inum < 0) return -1;
+    if (inum >= NUM_BLOCKS) return -1;
+
+    MFS_INode_t* inode = get_inode(fd, inum);
+    if (!inode) return -1;
+    if (inode->stat_info.blocks <= block) return -1;
+
+    dblock_seek_loc(fd, inode->block_nums[block]);
+    read(fd, buffer, MFS_BLOCK_SIZE);
+    free(inode);
+    return 0;
+}
+
+/*
+int MFS_Unlink(int pinum, char *name): MFS_Unlink() removes the file or directory name from the directory specified by pinum . 0 on success, -1 on failure. Failure modes: pinum does not exist, pinum does not represent a directory, the to-be-unlinked directory is NOT empty. Note that the name not existing is NOT a failure by our definition (think about why this might be).
+*/
+int mfs_unlink(int fd, int pinum, char* name) {
+    printf("UNLINKING %s FROM INODE %d\n", name, pinum);
+    if (pinum < 0) return -1;
+    MFS_INode_t* inode = get_inode(fd, pinum);
+
+    if (!inode) return -1;
+    if (!inode->stat_info.type == MFS_DIRECTORY) {
+        free(inode);
+        return -1;
+    }
+    MFS_DirEnt_t dirent;
+
+    int bnum, boff;
+    int inum_to_remove = -1;
+    for (int i = 0; i < inode->stat_info.size/SUBDIR_SIZE; i++) {
+        if (!dirent_in_use(fd, inode, i)) {
+            printf("dirent i unused\n");
+            continue;
+        }
+        else {
+            bnum = i / 16;
+            boff = i % 16;
+            dirent_seek_loc(fd, inode->block_nums[bnum], boff);
+            read(fd, &dirent, sizeof(MFS_DirEnt_t));
+            if (strcmp(dirent.name, name) != 0) continue;
+            inum_to_remove = dirent.inum;
+            break;
+        }
+    }
+    if (inum_to_remove == -1) {
+        printf("either not found or not in use\n");
+        free(inode);
+        return 0;
+    }
+
+    // if it's a dir, check if it's empty- if no, return -1
+    MFS_INode_t* inode_to_remove = get_inode(fd, inum_to_remove);
+    if (inode_to_remove->stat_info.type == MFS_DIRECTORY) {
+        if (!dir_is_empty(fd, inum_to_remove)) {
+            free(inode_to_remove);
+            free(inode);
+            return -1;
+        }
+    }
+
+    // set to -1 in the parent's dir table
+    int unused = -1;
+    dirent_seek_loc(fd, inode->block_nums[bnum], boff);
+    write(fd, &unused, sizeof(int));
+
+    // mark the child's blocks as unused
+    for (int i = 0; i < inode_to_remove->stat_info.blocks; i++) {
+        dblock_set_use(fd, inode_to_remove->block_nums[i], 0);
+    }
+
+    // mark the child as unused
+    inode_set_use(fd, inum_to_remove, 0);
+
+    // TODO: consolidate the parent's dir table?
+    defrag_directory(fd, pinum);
+    free(inode);
+    free(inode_to_remove);
     return 0;
 }
