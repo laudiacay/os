@@ -10,7 +10,7 @@ all: server mytest libmfs.so
 
 # this generates the target executables
 server: server.o udp.o $(SERVEROBJECTS) libmfs.so
-	$(CC) -o server server.o udp.o $(SERVEROBJECTS) -lexplain
+	$(CC) -o server server.o udp.o $(SERVEROBJECTS)
 
 mytest: mytest.o udp.o libmfs.so
 	$(CC) -o mytest mytest.o udp.o -L. -lmfs

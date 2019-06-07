@@ -7,7 +7,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <libexplain/open.h>
 
 #include "fsops.h"
 #include "inode.h"

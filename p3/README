@@ -1,0 +1,3 @@
+i worked on this alone
+
+i believe everything works! may have misinterpreted how you want unlink to work (i had it consolidate the direntries to decrease fragmentation and save space) but it passes all the tests.

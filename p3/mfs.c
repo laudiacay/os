@@ -20,21 +20,24 @@ struct timeval timeout;
 
 // TODO: retries, timeouts
 int do_send() {
-
-    int rc = UDP_Write(sd, &addr, buffer, BUFFER_SIZE);
-    if (rc > 0) {
-        FD_ZERO(&set);
-        FD_SET(sd, &set);
-        timeout.tv_sec = 1;
-        timeout.tv_usec = 0;
-        rc = UDP_Read(sd, &addr2, buffer, BUFFER_SIZE);
-        if (rc == -1) {
-            return -2;
-        }
-        if (rc == 0) {
-            printf("timeout, retry\n");
-            do_send();
-        }
+    int rc;
+    while (1) {
+        rc = UDP_Write(sd, &addr, buffer, BUFFER_SIZE);
+        if (rc > 0) {
+            FD_ZERO(&set);
+            FD_SET(sd, &set);
+            timeout.tv_sec = 5;
+            timeout.tv_usec = 0;
+            rc = select(sd+1, &set, NULL, NULL, &timeout);
+            if (rc == -1) {
+                return -2;
+            } else if (rc == 0) {
+                printf("timeout, retry\n");
+            } else {
+	        rc = UDP_Read(sd, &addr2, buffer, BUFFER_SIZE);
+		return rc;
+            }
+	}
     }
     return rc;
 }
