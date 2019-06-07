@@ -2,7 +2,7 @@ CCBIN = gcc
 CCFAST=$(CCBIN) -Wall -Wextra -Werror -pedantic -g -std=gnu99 -lpthread -pthread
 CCSLOW=$(CCFAST) -fsanitize=address -fno-omit-frame-pointer
 CC=$(CCFAST)
-SERVEROBJECTS=fsops.o directory.o inode.o dblock.o bitmap.o file.o
+SERVEROBJECTS=fsops.o directory.o inode.o dblock.o bitmap.o
 
 default: all
 

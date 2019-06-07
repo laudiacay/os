@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "mfs.h"
+#include "dblock.h"
 #include "bitmap.h"
 
 int inode_loc(int inum) {
@@ -13,18 +14,15 @@ int inode_loc(int inum) {
 
 void inode_seek_loc(int fd, int inum) {
     int offset = inode_loc(inum);
-    //printf("going to inode loc at %d\n", offset);
     lseek(fd, offset, SEEK_SET);
 }
 
 int inode_get_use(int fd, int inum) {
     lseek(fd, INODE_BITMAP_LOC, SEEK_SET);
-    //printf("getting usage of inode %d\n", inum);
     return bitmap_get_bit(fd, inum);
 }
 
 void inode_set_use(int fd, int inum, int val) {
-    //printf("setting usage of inode %d to %d\n", inum, val);
     lseek(fd, INODE_BITMAP_LOC, SEEK_SET);
     bitmap_set_bit(fd, inum, val);
 }
@@ -35,13 +33,28 @@ int inode_find_space(int fd) {
 }
 
 MFS_INode_t* get_inode(int fd, int inum) {
-    //printf("getting use of inode %d: %d\n", inum, inode_get_use(fd, inum));
     if (inum < 0 || inum >= NUM_BLOCKS || !inode_get_use(fd, inum)) {
-        //printf("not in use!\n");
         return NULL;
     }
     MFS_INode_t* mfsinode = malloc(sizeof(MFS_INode_t));
     inode_seek_loc(fd, inum);
     read(fd, mfsinode, sizeof(MFS_INode_t));
     return mfsinode;
+}
+
+void pad_file_to_n_blocks(int fd, int inum, int blocks) {
+    MFS_INode_t* inode = get_inode(fd, inum);
+    assert(inode);
+    assert(blocks <= 10);
+    assert(inode->stat_info.type == MFS_REGULAR_FILE);
+    if (inode->stat_info.blocks >= blocks) return;
+    for (int i = inode->stat_info.blocks; i < blocks; i++) {
+        inode->block_nums[i] = dblock_find_space(fd);
+        dblock_set_use(fd, inode->block_nums[i], 1);
+    }
+    inode->stat_info.blocks = blocks;
+    inode_seek_loc(fd, inum);
+    write(fd, inode, sizeof(MFS_INode_t));
+    free(inode);
+    fsync(fd);
 }

@@ -34,10 +34,10 @@ int do_send() {
             } else if (rc == 0) {
                 printf("timeout, retry\n");
             } else {
-	        rc = UDP_Read(sd, &addr2, buffer, BUFFER_SIZE);
-		return rc;
+	             rc = UDP_Read(sd, &addr2, buffer, BUFFER_SIZE);
+               return rc;
             }
-	}
+	       }
     }
     return rc;
 }
@@ -62,7 +62,6 @@ int MFS_Lookup(int pinum, char *name) {
     return ret;
 }
 
-// TODO: parse message out, return code
 int MFS_Stat(int inum, MFS_Stat_t *m) {
     char cmd_type = MFS_STAT;
     memcpy(&buffer[0], &cmd_type, 1);
@@ -80,8 +79,7 @@ int MFS_Write(int inum, char *block_buf, int block) {
     memcpy(&buffer[1], &inum, sizeof(int));
     memcpy(&buffer[1+sizeof(int)], &block, sizeof(int));
     memcpy(&buffer[1+2*sizeof(int)], block_buf, MFS_BLOCK_SIZE);
-    do_send();
-    int ret;
+    int ret = do_send();
     memcpy(&ret, &buffer[1], sizeof(int));
     return ret;
 }
@@ -111,7 +109,6 @@ int MFS_Creat(int pinum, int type, char *name) {
     return ret;
 }
 
-// TODO: parse message out, return code
 int MFS_Unlink(int pinum, char *name) {
     char cmd_type = MFS_UNLINK;
     memcpy(&buffer[0], &cmd_type, 1);

@@ -1,3 +1,7 @@
 i worked on this alone
 
 i believe everything works! may have misinterpreted how you want unlink to work (i had it consolidate the direntries to decrease fragmentation and save space) but it passes all the tests.
+
+you'll need to set MFS_SERVER and MFS_PORT to run the tests, also add $(pwd) to your LD_LIBRARY_PATH
+
+i tested on a very slow machine, so my timeout may need tweaking on line 29 of mfs.c if my code fails tests 41+ on your machine- hopefully won't be an issue, but you never know.

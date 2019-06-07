@@ -21,7 +21,6 @@ void dblock_set_use(int fd, int dbnum, int val) {
 }
 
 int dblock_find_space(int fd) {
-    //printf("finding dblock space. seeking to %d\n", DBLOCK_BITMAP_LOC);
     lseek(fd, DBLOCK_BITMAP_LOC, SEEK_SET);
     return bitmap_find_first_free(fd, NUM_BLOCKS);
 }

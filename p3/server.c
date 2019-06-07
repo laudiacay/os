@@ -79,10 +79,8 @@ int main(int argc, char *argv[]) {
                     rc = UDP_Write(sd, &s, buffer, BUFFER_SIZE);
                     break;
             }
-            //strncpy(buffer, "ok", BUFFER_SIZE);
-	        //rc = UDP_Write(sd, &s, buffer, BUFFER_SIZE);
             assert(rc > 0);
-	    }
+	      }
     }
 
     return 0;
