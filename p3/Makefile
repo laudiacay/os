@@ -6,14 +6,11 @@ SERVEROBJECTS=fsops.o directory.o inode.o dblock.o bitmap.o file.o
 
 default: all
 
-all: server mytest libmfs.so
+all: server libmfs.so
 
 # this generates the target executables
 server: server.o udp.o $(SERVEROBJECTS) libmfs.so
 	$(CC) -o server server.o udp.o $(SERVEROBJECTS)
-
-mytest: mytest.o udp.o libmfs.so
-	$(CC) -o mytest mytest.o udp.o -L. -lmfs
 
 libmfs.so: mfs.h mfs.o
 	$(CC) -shared -Wl,-soname,libmfs.so mfs.h mfs.o -o libmfs.so
@@ -26,4 +23,4 @@ mfs.o: mfs.h mfs.c
 	$(CC) -c $< -o $@
 
 clean:
-	rm -f *.o *.so* server mytest testclient *.pyc *.fs
+	rm -f *.o *.so* server testclient *.pyc *.fs
